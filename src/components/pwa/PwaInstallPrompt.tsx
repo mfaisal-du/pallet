@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Download, Share, Smartphone, X } from "lucide-react";
+import { Download, MoreVertical, Share, Smartphone, X } from "lucide-react";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -20,9 +20,14 @@ function isAppleMobileDevice() {
   );
 }
 
+function isAndroidDevice() {
+  return typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
+}
+
 export function PwaInstallPrompt() {
   const [visible, setVisible] = useState(false);
   const [isIos] = useState(isAppleMobileDevice);
+  const [isAndroid] = useState(isAndroidDevice);
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
 
@@ -35,6 +40,7 @@ export function PwaInstallPrompt() {
     const dismissedAt = Number(window.localStorage.getItem(DISMISSED_KEY) || 0);
     const recentlyDismissed = Date.now() - dismissedAt < DISMISS_FOR_MS;
     const ios = isAppleMobileDevice();
+    const android = isAndroidDevice();
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
@@ -51,13 +57,13 @@ export function PwaInstallPrompt() {
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    let iosTimer: number | undefined;
-    if (ios && !recentlyDismissed) {
-      iosTimer = window.setTimeout(() => setVisible(true), 1800);
+    let mobileTimer: number | undefined;
+    if ((ios || android) && !recentlyDismissed) {
+      mobileTimer = window.setTimeout(() => setVisible(true), 1800);
     }
 
     return () => {
-      if (iosTimer) window.clearTimeout(iosTimer);
+      if (mobileTimer) window.clearTimeout(mobileTimer);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
@@ -98,7 +104,9 @@ export function PwaInstallPrompt() {
                 <p className="mt-1 text-xs leading-5 text-slate-600">
                   {isIos
                     ? "Tap Share, then choose Add to Home Screen."
-                    : "Install the app for faster, full-screen access."}
+                    : isAndroid && !deferredPrompt
+                      ? "Open the Chrome menu, then choose Install app or Add to Home screen."
+                      : "Install the app for faster, full-screen access."}
                 </p>
                 <div className="mt-2.5 flex flex-wrap items-center gap-2">
                   {deferredPrompt ? (
@@ -111,7 +119,8 @@ export function PwaInstallPrompt() {
                     </button>
                   ) : (
                     <span className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">
-                      <Share size={14} /> Share menu
+                      {isIos ? <Share size={14} /> : <MoreVertical size={14} />}
+                      {isIos ? "Share menu" : "Chrome menu"}
                     </span>
                   )}
                   <button
