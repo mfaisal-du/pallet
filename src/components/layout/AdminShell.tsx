@@ -109,17 +109,11 @@ function buildBreadcrumbs(pathname: string) {
 
   segments.forEach((segment, index) => {
     currentPath += `/${segment}`;
-
-    if (segment === "pallets" && segments[index + 1]) {
-      if (segments[index + 1] === "register") {
-        items.push({ label: "Register Pallet", href: currentPath });
-      } else {
-        items.push({ label: "Pallet Profile", href: currentPath });
-      }
-      return;
-    }
-
-    items.push({ label: labels[segment] || segment.replace(/-/g, " "), href: currentPath });
+    const isPalletId = index > 0 && segments[index - 1] === "pallets" && !labels[segment];
+    items.push({
+      label: isPalletId ? "Pallet Profile" : labels[segment] || segment.replace(/-/g, " "),
+      href: currentPath,
+    });
   });
 
   return items;
@@ -146,13 +140,13 @@ export function AdminShell({
   }
 
   return (
-    <div className="flex min-h-dvh bg-[linear-gradient(165deg,#e8eef8_0%,#f3f6fb_45%,#f8fafc_100%)]">
+    <div className="flex h-dvh overflow-hidden bg-[linear-gradient(165deg,#e8eef8_0%,#f3f6fb_45%,#f8fafc_100%)]">
       {/* Mobile overlay */}
       <AnimatePresence>
         {mobileNavOpen && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-navy-950/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-navy-950/60 backdrop-blur-sm xl:hidden"
             onClick={() => setMobileNavOpen(false)}
           />
         )}
@@ -164,11 +158,12 @@ export function AdminShell({
           <motion.aside
             initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
             transition={{ type: "spring", stiffness: 340, damping: 34 }}
-            className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col overflow-hidden bg-gradient-to-b from-navy-950 via-[#0a1a32] to-[#0c2748] text-slate-200 shadow-2xl lg:hidden">
-            <div className="flex items-center justify-between border-b border-white/10 px-5 py-5">
+            className="fixed inset-y-0 left-0 z-50 flex w-[min(18rem,88vw)] flex-col overflow-hidden bg-gradient-to-b from-navy-950 via-[#0a1a32] to-[#0c2748] text-slate-200 shadow-2xl xl:hidden">
+            <div className="safe-pt flex items-center justify-between border-b border-white/10 px-5 pb-5">
               <LogoWordmark light />
               <button onClick={() => setMobileNavOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:text-white transition">
+                aria-label="Close navigation"
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-300 hover:bg-white/10 hover:text-white transition">
                 <X size={16} />
               </button>
             </div>
@@ -195,7 +190,7 @@ export function AdminShell({
                 </div>
               ))}
             </nav>
-            <div className="border-t border-white/10 p-4">
+            <div className="safe-pb border-t border-white/10 p-4">
               <p className="text-[11px] text-slate-400 font-semibold">{userName}</p>
               <p className="text-[10px] font-bold uppercase tracking-wide text-sky-200/70">{roleLabel(userRole)}</p>
               <div className="mt-2"><SignOutButton /></div>
@@ -203,7 +198,7 @@ export function AdminShell({
           </motion.aside>
         )}
       </AnimatePresence>
-      <aside className="relative hidden w-[250px] shrink-0 flex-col overflow-hidden bg-gradient-to-b from-navy-950 via-[#0a1a32] to-[#0c2748] text-slate-200 lg:flex lg:w-[270px]">
+      <aside className="relative hidden w-[270px] shrink-0 flex-col overflow-hidden bg-gradient-to-b from-navy-950 via-[#0a1a32] to-[#0c2748] text-slate-200 xl:flex">
         <div className="pointer-events-none absolute -left-12 top-20 h-48 w-48 rounded-full bg-blue-500/20 blur-3xl" />
         <div className="pointer-events-none absolute -right-16 bottom-32 h-40 w-40 rounded-full bg-sky-400/15 blur-3xl" />
 
@@ -272,10 +267,11 @@ export function AdminShell({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 border-b border-line/80 bg-white/90 shadow-sm backdrop-blur-xl">
-          <div className="flex items-center gap-3 px-3 py-3 sm:px-4 md:px-6">
-            <div className="flex items-center gap-2 lg:hidden">
+          <div className="safe-pt flex items-center gap-3 px-3 pb-3 sm:px-4 md:px-6">
+            <div className="flex items-center gap-2 xl:hidden">
               <button onClick={() => setMobileNavOpen(true)}
-                className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-white text-navy-900 shadow-sm hover:bg-slate-50 transition">
+                aria-label="Open navigation"
+                className="flex h-11 w-11 items-center justify-center rounded-xl border border-line bg-white text-navy-900 shadow-sm hover:bg-slate-50 transition">
                 <Menu size={16} />
               </button>
             </div>
@@ -308,7 +304,7 @@ export function AdminShell({
           </div>
 
           {/* Mobile horizontal nav */}
-          <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <nav className="flex gap-1 overflow-x-auto px-3 pb-3 xl:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {flatNav.map((item) => {
               const Icon = item.icon;
               const on = isOn(item.href);
@@ -316,7 +312,7 @@ export function AdminShell({
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${
+                    className={`relative flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors ${
                     on
                       ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
                       : "bg-surface text-slate-600 hover:bg-blue-50 hover:text-blue-700"
@@ -330,14 +326,14 @@ export function AdminShell({
           </nav>
         </header>
 
-        <main className="admin-scroll flex-1 overflow-auto p-3 sm:p-5 md:p-7">
-          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-2xl border border-line/80 bg-white/85 px-3 py-2.5 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur">
+        <main className="admin-scroll safe-pb min-h-0 flex-1 overflow-auto p-3 sm:p-5 md:p-7">
+          <div className="mb-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap rounded-2xl border border-line/80 bg-white/85 px-3 py-2.5 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <Link href="/admin" className="flex items-center gap-1.5 text-slate-700 hover:text-blue-700">
               <Home size={13} />
               <span>Dashboard</span>
             </Link>
             {breadcrumbs.slice(1).map((item, index) => (
-              <div key={`${item.href}-${index}`} className="flex items-center gap-2">
+              <div key={`${item.href}-${index}`} className="flex shrink-0 items-center gap-2">
                 <ChevronRight size={12} className="text-slate-400" />
                 {index === breadcrumbs.length - 2 ? (
                   <span className="font-bold text-navy-900">{item.label}</span>

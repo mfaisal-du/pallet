@@ -79,13 +79,13 @@ export function AuditPageClient({ entries }: { entries: AuditEntry[] }) {
                   <span className="mono-code text-[10px] text-muted">{entry.entityId.slice(0, 8)}…</span>
                 )}
               </div>
-              <div className="mt-2 flex items-center gap-3 text-xs text-muted">
-                <span className="font-semibold text-ink">{entry.userEmail || "system"}</span>
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+                <span className="break-all font-semibold text-ink">{entry.userEmail || "system"}</span>
                 <span>·</span>
                 <span>{formatDateTime(entry.createdAt)}</span>
               </div>
               {entry.detail && (
-                <p className="mt-1.5 text-xs text-muted">{entry.detail}</p>
+                <p className="mt-1.5 break-words text-xs text-muted">{entry.detail}</p>
               )}
             </motion.div>
           ))

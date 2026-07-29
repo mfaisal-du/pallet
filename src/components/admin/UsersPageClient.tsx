@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { formatDate } from "@/lib/format-date";
-import { roleLabel, roleBadgeColor } from "@/lib/roles";
+import { roleLabel } from "@/lib/roles";
 import {
-  Users, UserPlus, Search, Edit2, UserX, UserCheck,
+  UserPlus, Search, Edit2, UserX, UserCheck,
   ChevronDown, ChevronUp, Shield, Activity,
 } from "lucide-react";
 
@@ -169,8 +169,8 @@ export function UsersPageClient() {
     <PageReveal className="space-y-6">
       {/* Hero */}
       <div className="relative isolate overflow-hidden rounded-[1.6rem] bg-gradient-to-br from-navy-950 via-[#0f2744] to-emerald-900 p-5 text-white shadow-xl sm:p-6">
-        <div className="relative z-10 flex items-start justify-between gap-4">
-          <div>
+        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">User Management</h1>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-emerald-50/80">
               <span className="flex items-center gap-1.5">
@@ -186,7 +186,7 @@ export function UsersPageClient() {
               <span>{ROLE_ORDER.length} roles &middot; RBAC enforced</span>
             </div>
           </div>
-          <Button variant="white" className="!min-h-0 !px-4 !py-2 !text-xs shrink-0" onClick={() => setShowAdd(true)}>
+          <Button variant="white" className="w-full !px-4 !py-2 !text-xs sm:w-auto sm:shrink-0" onClick={() => setShowAdd(true)}>
             <UserPlus size={13} /> Add user
           </Button>
         </div>
@@ -244,7 +244,7 @@ export function UsersPageClient() {
                     >
                       <div className="divide-y divide-line">
                         {group.users.map((u) => (
-                          <div key={u.id} className={`flex items-center gap-3 px-4 py-3 ${!u.active ? "opacity-50" : ""}`}>
+                          <div key={u.id} className={`flex items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4 ${!u.active ? "opacity-50" : ""}`}>
                             <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${grad} text-xs font-bold text-white shadow`}>
                               {u.name.slice(0, 1).toUpperCase()}
                             </div>
@@ -263,12 +263,12 @@ export function UsersPageClient() {
                             </div>
                             <div className="flex shrink-0 items-center gap-1">
                               <button onClick={() => openEdit(u)} title="Edit user"
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                                className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors">
                                 <Edit2 size={13} />
                               </button>
                               <button onClick={() => handleToggleActive(u)}
                                 title={u.active ? "Deactivate" : "Activate"}
-                                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${u.active ? "text-slate-400 hover:bg-red-50 hover:text-red-600" : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"}`}>
+                                className={`flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${u.active ? "text-slate-400 hover:bg-red-50 hover:text-red-600" : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"}`}>
                                 {u.active ? <UserX size={13} /> : <UserCheck size={13} />}
                               </button>
                             </div>
@@ -297,7 +297,7 @@ export function UsersPageClient() {
             </select></div>
           <div><label className="text-xs font-bold uppercase text-muted">Password</label>
             <input type="password" className="input-premium mt-1 text-sm" placeholder="Minimum 8 characters" value={addForm.password} onChange={(e) => setAddForm({ ...addForm, password: e.target.value })} /></div>
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row">
             <Button variant="secondary" fullWidth onClick={() => setShowAdd(false)}>Cancel</Button>
             <Button fullWidth disabled={submittingAdd || !addForm.name || !addForm.email} onClick={handleAdd}>
               {submittingAdd ? "Creating..." : "Create user"}
@@ -317,7 +317,7 @@ export function UsersPageClient() {
             </select></div>
           <div><label className="text-xs font-bold uppercase text-muted">New Password <span className="font-normal">(leave blank to keep)</span></label>
             <input type="password" className="input-premium mt-1 text-sm" placeholder="Leave blank to keep current" value={editForm.password} onChange={(e) => setEditForm({ ...editForm, password: e.target.value })} /></div>
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row">
             <Button variant="secondary" fullWidth onClick={() => setEditUser(null)}>Cancel</Button>
             <Button fullWidth disabled={submittingEdit || !editForm.name} onClick={handleEdit}>
               {submittingEdit ? "Saving..." : "Save changes"}

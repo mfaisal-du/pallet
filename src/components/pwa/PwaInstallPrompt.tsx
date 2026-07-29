@@ -1,129 +1,146 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Download, Smartphone, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Download, Share, Smartphone, X } from "lucide-react";
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
+const DISMISSED_KEY = "pwa-install-dismissed-at";
+const INSTALLED_KEY = "pwa-install-observed";
+const DISMISS_FOR_MS = 7 * 24 * 60 * 60 * 1000;
+
+function isAppleMobileDevice() {
+  if (typeof navigator === "undefined") return false;
+  return (
+    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
 export function PwaInstallPrompt() {
   const [visible, setVisible] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [dismissedAt, setDismissedAt] = useState<number | null>(null);
+  const [isIos] = useState(isAppleMobileDevice);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const installedKey = "pwa-install-installed";
-    if (window.localStorage.getItem(installedKey) === "1") return;
-
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
-      Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
-
+      Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
     if (isStandalone) {
-      window.localStorage.setItem(installedKey, "1");
+      window.localStorage.setItem(INSTALLED_KEY, "1");
       return;
     }
+    if (window.localStorage.getItem(INSTALLED_KEY) === "1") return;
 
-    const showPrompt = () => {
-      if (dismissedAt && Date.now() - dismissedAt < 5 * 60 * 1000) return;
-      setVisible(true);
-    };
+    const dismissedAt = Number(window.localStorage.getItem(DISMISSED_KEY) || 0);
+    const recentlyDismissed = Date.now() - dismissedAt < DISMISS_FOR_MS;
+    const ios = isAppleMobileDevice();
 
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
-      showPrompt();
+      if (!recentlyDismissed) setVisible(true);
     };
 
     const handleAppInstalled = () => {
       setVisible(false);
-      window.localStorage.setItem(installedKey, "1");
+      setDeferredPrompt(null);
+      window.localStorage.setItem(INSTALLED_KEY, "1");
+      window.localStorage.removeItem(DISMISSED_KEY);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 
-    const firstTimer = window.setTimeout(showPrompt, 1500);
-    const reminderTimer = window.setInterval(showPrompt, 5 * 60 * 1000);
+    let iosTimer: number | undefined;
+    if (ios && !recentlyDismissed) {
+      iosTimer = window.setTimeout(() => setVisible(true), 1800);
+    }
 
     return () => {
-      window.clearTimeout(firstTimer);
-      window.clearInterval(reminderTimer);
+      if (iosTimer) window.clearTimeout(iosTimer);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
-  if (!visible) return null;
-
-  const dismissReminder = () => {
+  function dismiss() {
+    window.localStorage.setItem(DISMISSED_KEY, String(Date.now()));
     setVisible(false);
-    setDismissedAt(Date.now());
-  };
+  }
 
-  async function handleInstall() {
-    if (!deferredPrompt) {
-      setVisible(false);
-      return;
-    }
-
+  async function install() {
+    if (!deferredPrompt) return;
     await deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    if (choice.outcome === "accepted") {
-      window.localStorage.setItem("pwa-install-installed", "1");
-      setVisible(false);
-    } else {
-      setVisible(false);
-    }
+    await deferredPrompt.userChoice;
+    setDeferredPrompt(null);
+    setVisible(false);
   }
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 24, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 16, scale: 0.98 }}
-        transition={{ duration: 0.28, ease: "easeOut" }}
-        className="fixed bottom-3 left-3 z-[1200] max-w-[320px] sm:left-4"
-      >
-        <div className="rounded-2xl border border-slate-200 bg-white/95 px-3 py-2.5 text-slate-900 shadow-[0_10px_30px_rgba(15,23,42,0.14)] backdrop-blur">
-          <div className="flex items-start gap-2">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
-              <Smartphone size={15} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[12px] font-semibold text-slate-900">
-                Install PalletTrack Pro
-              </p>
-              <p className="mt-0.5 text-[11px] leading-4 text-slate-600">
-                Add it to your home screen for quicker access.
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleInstall}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-blue-500"
-                >
-                  <Download size={12} /> Install
-                </button>
-                <button
-                  type="button"
-                  onClick={dismissReminder}
-                  className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200"
-                  aria-label="Dismiss install reminder"
-                >
-                  <X size={12} />
-                </button>
+      {visible ? (
+        <motion.aside
+          initial={{ opacity: 0, y: 24, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 16, scale: 0.98 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          className="fixed inset-x-3 z-[1200] max-w-sm sm:left-4 sm:right-auto"
+          style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+          aria-label="Install PalletTrack Pro"
+        >
+          <div className="rounded-2xl border border-slate-200 bg-white/95 p-3 text-slate-900 shadow-[0_12px_36px_rgba(15,23,42,0.2)] backdrop-blur">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+                <Smartphone size={18} />
               </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold">Install PalletTrack Pro</p>
+                <p className="mt-1 text-xs leading-5 text-slate-600">
+                  {isIos
+                    ? "Tap Share, then choose Add to Home Screen."
+                    : "Install the app for faster, full-screen access."}
+                </p>
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  {deferredPrompt ? (
+                    <button
+                      type="button"
+                      onClick={install}
+                      className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-500"
+                    >
+                      <Download size={14} /> Install app
+                    </button>
+                  ) : (
+                    <span className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700">
+                      <Share size={14} /> Share menu
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={dismiss}
+                    className="inline-flex min-h-10 items-center justify-center rounded-xl px-3 py-2 text-xs font-bold text-slate-600 transition hover:bg-slate-100"
+                  >
+                    Not now
+                  </button>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={dismiss}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100"
+                aria-label="Dismiss install reminder"
+              >
+                <X size={16} />
+              </button>
             </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.aside>
+      ) : null}
     </AnimatePresence>
   );
 }

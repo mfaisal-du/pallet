@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { PageReveal } from "@/components/motion/PageReveal";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -41,16 +41,10 @@ export function PalletLabelsPrintClient({
   const [search, setSearch] = useState("");
   const [materialFilter, setMaterialFilter] = useState<string>("all");
   const [unprintedOnly, setUnprintedOnly] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(
+    () => new Set(initialPallets.filter((p) => !p.printedAt).map((p) => p.id))
+  );
   const [printing, setPrinting] = useState(false);
-
-  // Auto-select all unprinted pallets on first load
-  useEffect(() => {
-    const unprinted = initialPallets.filter((p) => !p.printedAt).map((p) => p.id);
-    if (unprinted.length > 0) {
-      setSelectedIds(new Set(unprinted));
-    }
-  }, [initialPallets]);
 
   const filtered = useMemo(() => {
     let result = pallets;
@@ -135,6 +129,7 @@ export function PalletLabelsPrintClient({
         actions={
           <Button
             variant="white"
+            className="w-full sm:w-auto"
             disabled={selectedIds.size === 0 || printing}
             onClick={handlePrint}
           >
@@ -146,7 +141,7 @@ export function PalletLabelsPrintClient({
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex-1 min-w-[200px] max-w-md">
+        <div className="min-w-0 basis-full sm:min-w-[200px] sm:max-w-md sm:flex-1">
           <div className="flex items-center gap-2 rounded-xl border border-line bg-white px-3 py-2">
             <Search size={14} className="text-muted" />
             <input
@@ -233,7 +228,7 @@ export function PalletLabelsPrintClient({
             <div key={material} className="rounded-2xl border border-line bg-white">
               <button
                 onClick={() => toggleGroup(material)}
-                className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                className="flex w-full flex-wrap items-center gap-2 px-4 py-3 text-left sm:gap-3"
               >
                 {allSelected ? (
                   <CheckSquare size={16} className="text-blue-600" />
@@ -296,7 +291,7 @@ export function PalletLabelsPrintClient({
           <p className="print-hide mb-3 text-xs font-bold uppercase tracking-wide text-muted">
             Print preview — {selectedPallets.length} label{selectedPallets.length === 1 ? "" : "s"}
           </p>
-          <div className="print-grid grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+          <div className="print-grid grid grid-cols-1 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {selectedPallets.map((p) => (
               <div key={p.id} className="print-label flex justify-center">
                 <PalletQrLabel

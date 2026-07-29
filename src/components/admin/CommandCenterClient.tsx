@@ -10,7 +10,7 @@ import Link from "next/link";
 import {
   Package, Truck, MapPin, RotateCcw, AlertTriangle,
   Activity, RefreshCw, Clock, CheckCircle2, HelpCircle,
-  Wrench, XCircle, ArrowRight, Search, QrCode,
+  ArrowRight, Search, QrCode,
   Hash, Layers, BarChart2, TrendingUp,
 } from "lucide-react";
 import type { PalletStatus } from "@/lib/pallet-machine";
@@ -111,7 +111,7 @@ function PalletResultCard({ result }: { result: PalletResult }) {
       className="rounded-2xl border-2 border-indigo-200 bg-indigo-50/40 p-4 shadow-sm">
       {/* Header row */}
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
+        <div className="min-w-0">
           <p className="font-mono text-lg font-black text-navy-900">{result.palletNumber}</p>
           <p className="text-xs text-muted">Pallet ID: {result.id.slice(0, 12)}…</p>
         </div>
@@ -133,9 +133,9 @@ function PalletResultCard({ result }: { result: PalletResult }) {
         ].map(({ icon: Icon, label, value }) => (
           <div key={label} className="flex items-start gap-2 rounded-xl border border-white bg-white px-3 py-2.5 shadow-sm">
             <Icon size={13} className="mt-0.5 shrink-0 text-indigo-400" />
-            <div>
+            <div className="min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-wide text-muted">{label}</p>
-              <p className="text-xs font-semibold text-navy-900 capitalize">{value}</p>
+              <p className="break-words text-xs font-semibold text-navy-900 capitalize">{value}</p>
             </div>
           </div>
         ))}
@@ -230,7 +230,7 @@ export function CommandCenterClient() {
           <h1 className="font-display text-2xl font-bold text-navy-900 sm:text-3xl">Command Center</h1>
           <p className="text-xs text-muted mt-0.5">Synced {lastRefresh.toLocaleTimeString()} · {total} total pallets</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {alertCount > 0 && (
             <div className="flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600">
               <AlertTriangle size={11} /> {alertCount} alert{alertCount !== 1 ? "s" : ""}
@@ -241,14 +241,15 @@ export function CommandCenterClient() {
             {autoRefresh ? "Auto On" : "Auto Off"}
           </button>
           <button onClick={() => fetchData()}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-white text-muted hover:text-navy-900 transition shadow-sm">
+            aria-label="Refresh command center"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-line bg-white text-muted hover:text-navy-900 transition shadow-sm">
             <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
       </div>
 
       {/* ── PIPELINE ── */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
         {STAGES.map(({ key, label, color, bg, border, icon: Icon }, idx) => {
           const count = sm[key] ?? 0;
           return (
@@ -262,7 +263,7 @@ export function CommandCenterClient() {
               </motion.p>
               <p className="mt-0.5 text-[10px] font-bold text-slate-500">{label}</p>
               {idx < STAGES.length - 1 && (
-                <ArrowRight size={11} className="absolute -right-2 top-1/2 -translate-y-1/2 text-slate-300 hidden sm:block z-10" />
+                <ArrowRight size={11} className="absolute -right-2 top-1/2 -translate-y-1/2 text-slate-300 hidden md:block z-10" />
               )}
             </div>
           );
@@ -289,7 +290,7 @@ export function CommandCenterClient() {
 
       {/* ── PALLET LOOKUP ── */}
       <div className="rounded-2xl border border-line bg-white shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between border-b border-line px-5 py-3">
+        <div className="flex flex-col gap-3 border-b border-line px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div className="flex items-center gap-2">
             <Search size={14} className="text-indigo-500" />
             <p className="text-sm font-bold text-navy-900">Pallet Lookup</p>
@@ -307,15 +308,15 @@ export function CommandCenterClient() {
         </div>
         <div className="p-4 space-y-3">
           {lookupMode === "type" ? (
-            <form onSubmit={handleSearchSubmit} className="flex gap-2">
+            <form onSubmit={handleSearchSubmit} className="flex flex-col gap-2 sm:flex-row">
               <input
-                className="input-premium flex-1 font-mono text-sm"
+                className="input-premium min-w-0 flex-1 font-mono text-sm"
                 placeholder="Enter pallet number (e.g. PT-MS24JRRVQ46N)"
                 value={searchQ}
                 onChange={e => { setSearchQ(e.target.value); setSearchResult(null); setSearchError(null); }}
               />
               <button type="submit" disabled={!searchQ.trim() || searching}
-                className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 transition disabled:opacity-40">
+                className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-indigo-700 transition disabled:opacity-40">
                 {searching ? <RefreshCw size={13} className="animate-spin" /> : <Search size={13} />} Look up
               </button>
             </form>
@@ -351,10 +352,10 @@ export function CommandCenterClient() {
       </div>
 
       {/* ── MAIN GRID ── */}
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 xl:grid-cols-3">
 
         {/* ── Activity Feed ── */}
-        <div className="lg:col-span-2 rounded-2xl border border-line bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-line bg-white shadow-sm overflow-hidden xl:col-span-2">
           <div className="flex items-center justify-between border-b border-line px-5 py-3">
             <div className="flex items-center gap-2">
               <Activity size={14} className="text-indigo-500" />
@@ -371,7 +372,7 @@ export function CommandCenterClient() {
                 <div className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${ACTION_DOT[item.action] ?? "bg-slate-300"}`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-navy-900">
-                    <Link href={`/admin/pallets?q=${item.palletNumber}`} className="font-mono font-bold hover:underline">{item.palletNumber}</Link>
+                    <Link href={`/admin/pallets?q=${item.palletNumber}`} className="break-all font-mono font-bold hover:underline">{item.palletNumber}</Link>
                     <span className="mx-1.5 text-slate-300">·</span>
                     <span className="text-slate-600">{ACTION_LABELS[item.action] || item.action}</span>
                   </p>

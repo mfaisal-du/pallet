@@ -25,7 +25,7 @@ export function AdminDataToolbar({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex-1 min-w-[200px] max-w-md">
+        <div className="min-w-0 basis-full sm:min-w-[200px] sm:max-w-md sm:flex-1">
           <div className="flex items-center gap-2 rounded-xl border border-line bg-white px-3 py-2">
             <Search size={14} className="text-muted" />
             <input

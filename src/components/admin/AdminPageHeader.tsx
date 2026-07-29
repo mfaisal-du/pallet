@@ -49,7 +49,7 @@ export function AdminPageHeader({
       </div>
 
       <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-sky-100 backdrop-blur-md">
             <Icon size={12} />
             {badge || "Overview"}
@@ -57,7 +57,7 @@ export function AdminPageHeader({
           <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
           {subtitle && <p className="mt-1.5 max-w-xl text-sm text-blue-50/90">{subtitle}</p>}
         </div>
-        {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
+        {actions && <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:shrink-0">{actions}</div>}
       </div>
     </div>
   );

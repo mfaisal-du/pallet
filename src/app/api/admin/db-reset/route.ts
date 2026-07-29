@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { safeAuth } from "@/lib/safe-auth";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
-import QRCode from "qrcode";
 
 // Admin-only: clear pallet data or seed demo pallets
 export async function POST(req: NextRequest) {

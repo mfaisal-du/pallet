@@ -109,7 +109,7 @@ export function LoginForm() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        className="glass-panel space-y-4 rounded-[1.35rem] p-6 sm:p-7"
+        className="glass-panel space-y-4 rounded-[1.35rem] p-4 min-[360px]:p-6 sm:p-7"
       >
         <div className="space-y-1.5">
           <label htmlFor="email" className="text-xs font-bold uppercase tracking-[0.08em] text-muted">
@@ -174,7 +174,7 @@ export function LoginForm() {
           </p>
           <Badge tone="neutral">password123</Badge>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 min-[360px]:grid-cols-2">
           {demos.map((d, i) => {
             const Icon = d.icon;
             return (

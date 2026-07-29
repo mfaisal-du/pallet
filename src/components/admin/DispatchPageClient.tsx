@@ -5,10 +5,9 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageReveal } from "@/components/motion/PageReveal";
 import { Badge } from "@/components/ui/Badge";
-import { formatDate } from "@/lib/format-date";
 import {
   Truck, Package, MapPin, Clock, AlertTriangle,
-  ArrowRight, QrCode, CheckCircle2, RefreshCw, Eye,
+  ArrowRight, QrCode, CheckCircle2, Eye,
   Users, BarChart3,
 } from "lucide-react";
 
@@ -35,14 +34,12 @@ export function DispatchPageClient({
   inTransitPallets,
   activeTrucks,
   activeDrivers,
-  userRole,
 }: {
   availablePallets: AvailablePallet[];
   loadedPallets: LoadedPallet[];
   inTransitPallets: InTransitPallet[];
   activeTrucks: FleetTruck[];
   activeDrivers: FleetDriver[];
-  userRole: string;
 }) {
   const [tab, setTab] = useState<"ready" | "transit" | "fleet">("ready");
   const now = new Date();
@@ -69,7 +66,7 @@ export function DispatchPageClient({
               {overdueCount > 0 && <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-red-400 animate-pulse" />{overdueCount} overdue</span>}
             </div>
           </div>
-          <Link href="/admin/scan" className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition shrink-0 backdrop-blur-sm">
+          <Link href="/admin/scan" className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition sm:w-auto sm:shrink-0 backdrop-blur-sm">
             <QrCode size={14} /> Open Scanner
           </Link>
         </div>
@@ -126,7 +123,7 @@ export function DispatchPageClient({
               {availablePallets.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-line bg-white py-6 text-center text-xs text-muted">No available pallets waiting to be loaded.</div>
               ) : (
-                <div className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm">
+                <div className="overflow-x-auto rounded-2xl border border-emerald-200 bg-white shadow-sm admin-scroll">
                   <table className="w-full min-w-[460px] text-left text-sm">
                     <thead className="border-b border-emerald-100 bg-emerald-50 text-[11px] font-bold uppercase tracking-wide text-emerald-700">
                       <tr>
@@ -168,7 +165,7 @@ export function DispatchPageClient({
               <div className="rounded-xl border border-dashed border-line bg-white py-6 text-center text-xs text-muted">No loaded pallets waiting for dispatch.</div>
             ) : (
               <div className="space-y-2">
-                <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+                <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-sm admin-scroll">
                   <table className="w-full min-w-[520px] text-left text-sm">
                     <thead className="border-b border-line bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-muted">
                       <tr>

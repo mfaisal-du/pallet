@@ -97,11 +97,13 @@ export function ScannerView({
       const scanner = new Html5Qrcode("qr-scanner-region");
       scannerRef.current = scanner;
 
+      const scanBoxSize = Math.min(250, Math.max(180, containerRef.current.clientWidth - 32));
+
       await scanner.start(
         { facingMode: "environment" },
         {
           fps: 10,
-          qrbox: { width: 250, height: 250 },
+          qrbox: { width: scanBoxSize, height: scanBoxSize },
           aspectRatio: 1.0,
         },
         (decodedText) => {
@@ -130,13 +132,16 @@ export function ScannerView({
   }, [disabled, onScan]);
 
   useEffect(() => {
-    if (mode === "camera") {
-      startCamera();
-    } else {
-      stopCamera();
-    }
+    const timer = window.setTimeout(() => {
+      if (mode === "camera") {
+        void startCamera();
+      } else {
+        void stopCamera();
+      }
+    }, 0);
     return () => {
-      stopCamera();
+      window.clearTimeout(timer);
+      void stopCamera();
     };
   }, [mode, startCamera, stopCamera]);
 
@@ -228,10 +233,10 @@ export function ScannerView({
               {scanning && (
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                   <div
-                    className={`h-56 w-56 rounded-3xl border-4 ${styles.frame} border-dashed opacity-80`}
+                    className={`h-[min(14rem,65vw)] w-[min(14rem,65vw)] rounded-3xl border-4 ${styles.frame} border-dashed opacity-80`}
                   />
                   <motion.div
-                    className={`absolute h-1 w-48 rounded-full ${styles.frame.replace("border", "bg")}`}
+                    className={`absolute h-1 w-[min(12rem,55vw)] rounded-full ${styles.frame.replace("border", "bg")}`}
                     animate={{
                       y: [-94, 94, -94],
                     }}

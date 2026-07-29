@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { PageReveal, StaggerList, StaggerItem } from "@/components/motion/PageReveal";
 import {
@@ -56,14 +57,7 @@ export function AdminDashboardClient({
   recentPallets: PalletRow[];
 }) {
   const first = userName.split(" ")[0] || "Admin";
-  const [greet, setGreet] = useState("Welcome");
   const [liveKpis, setLiveKpis] = useState(kpis);
-  useEffect(() => {
-    const hour = new Date().getHours();
-    setGreet(
-      hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening"
-    );
-  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -95,10 +89,6 @@ export function AdminDashboardClient({
       window.clearInterval(timer);
     };
   }, []);
-
-  useEffect(() => {
-    setLiveKpis(kpis);
-  }, [kpis]);
 
   const tiles = [
     {
@@ -152,7 +142,7 @@ export function AdminDashboardClient({
       <motion.section
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative isolate overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-navy-950 via-blue-900 to-blue-600 p-6 text-white shadow-2xl shadow-blue-900/25 sm:p-8"
+        className="relative isolate overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-navy-950 via-blue-900 to-blue-600 p-5 text-white shadow-2xl shadow-blue-900/25 sm:p-8"
       >
         <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
           <motion.div
@@ -174,25 +164,25 @@ export function AdminDashboardClient({
               Executive dashboard
             </p>
             <h1 className="mt-1 font-display text-3xl font-bold tracking-tight sm:text-4xl">
-              {greet}, {first}
+              Welcome, {first}
             </h1>
             <p className="mt-2 max-w-lg text-sm text-blue-100/90">
               {liveKpis.total} pallets tracked · {liveKpis.available} available · {liveKpis.inTransit} in transit · {userCount} users
             </p>
           </div>
           <div className="relative z-20 flex w-full shrink-0 flex-wrap gap-2 rounded-2xl border border-white/20 bg-navy-950/45 p-2 shadow-lg backdrop-blur-md sm:w-auto sm:max-w-sm sm:justify-end">
-            <a
+            <Link
               href="/admin/scan"
               className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-navy-900 shadow-md"
             >
               <QrCode size={14} /> Scan pallet
-            </a>
-            <a
+            </Link>
+            <Link
               href="/admin/reports"
               className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-4 py-2.5 text-xs font-bold text-white ring-1 ring-white/25"
             >
               <BarChart3 size={14} /> Reports
-            </a>
+            </Link>
           </div>
         </div>
       </motion.section>
@@ -201,7 +191,7 @@ export function AdminDashboardClient({
       <StaggerList className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {tiles.map((t) => (
           <StaggerItem key={t.label}>
-            <a href={t.href} className="group block">
+            <Link href={t.href} className="group block">
               <motion.div
                 whileHover={{ y: -3 }}
                 className="relative overflow-hidden rounded-[1.35rem] bg-white p-5 shadow-lg shadow-blue-900/5 ring-1 ring-line/80 transition group-hover:ring-blue-200"
@@ -225,7 +215,7 @@ export function AdminDashboardClient({
                   />
                 </p>
               </motion.div>
-            </a>
+            </Link>
           </StaggerItem>
         ))}
       </StaggerList>
@@ -270,12 +260,12 @@ export function AdminDashboardClient({
           ))}
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          <a
+          <Link
             href="/admin/pallets"
             className="rounded-full bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-800 ring-1 ring-blue-100"
           >
             Manage pallets
-          </a>
+          </Link>
         </div>
       </motion.section>
 
@@ -290,12 +280,12 @@ export function AdminDashboardClient({
             <h2 className="font-display font-bold text-navy-900">
               Recent pallets
             </h2>
-            <a
+            <Link
               href="/admin/pallets"
               className="text-xs font-bold text-blue-700 hover:underline"
             >
               View all
-            </a>
+            </Link>
           </div>
           <ul className="space-y-2">
             {recentPallets.length === 0 ? (
@@ -305,22 +295,22 @@ export function AdminDashboardClient({
             ) : (
               recentPallets.map((p) => (
                 <li key={p.id}>
-                  <a
+                  <Link
                     href={`/admin/pallets/${p.id}`}
-                    className="flex items-center justify-between rounded-xl border border-line bg-surface/60 px-3 py-2.5 transition hover:border-blue-200 hover:bg-blue-50/50"
+                    className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface/60 px-3 py-2.5 transition hover:border-blue-200 hover:bg-blue-50/50"
                   >
-                    <div>
-                      <p className="text-sm font-bold text-navy-900 mono-code">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-navy-900 mono-code">
                         {p.palletNumber}
                       </p>
                       <p className="text-[11px] text-muted">
                         {p.currentLocation || "No location"}
                       </p>
                     </div>
-                    <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-800 ring-1 ring-blue-600/15">
+                    <span className="inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-800 ring-1 ring-blue-600/15">
                       {p.status.replace(/_/g, " ")}
                     </span>
-                  </a>
+                  </Link>
                 </li>
               ))
             )}
@@ -390,13 +380,13 @@ export function AdminDashboardClient({
               <p className="text-xs text-muted">{userCount} accounts</p>
             </div>
           </div>
-          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <ul className="grid grid-cols-1 gap-2 min-[380px]:grid-cols-2 sm:grid-cols-4">
             {byRole.map((r) => (
               <li
                 key={r.role}
-                className="flex items-center justify-between rounded-xl bg-surface px-3 py-2.5 text-sm"
+                className="flex min-w-0 items-center justify-between gap-2 rounded-xl bg-surface px-3 py-2.5 text-sm"
               >
-                <span className="font-semibold capitalize text-ink">
+                <span className="min-w-0 break-words font-semibold capitalize text-ink">
                   {r.role.replace(/_/g, " ")}
                 </span>
                 <span className="font-display text-base font-bold text-blue-700">

@@ -11,7 +11,7 @@ import { formatDate } from "@/lib/format-date";
 import type { Role } from "@prisma/client";
 import {
   Truck, Users, Plus, Edit2, PowerOff, Power,
-  Search, Hash, Phone, FileText, Weight, Link2, Link2Off,
+  Search, Hash, Phone, FileText, Weight, Link2,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -189,8 +189,8 @@ export function FleetPageClient({ userRole }: { userRole: Role }) {
     <PageReveal className="space-y-6">
       {/* Hero */}
       <div className="relative isolate overflow-hidden rounded-[1.6rem] bg-gradient-to-br from-[#0a1628] via-slate-900 to-indigo-950 p-5 text-white shadow-xl sm:p-6">
-        <div className="relative z-10 flex items-start justify-between gap-4">
-          <div>
+        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Fleet Management</h1>
             <div className="mt-2 flex flex-wrap gap-4 text-xs text-white/70">
               <span className="flex items-center gap-1.5">
@@ -206,7 +206,7 @@ export function FleetPageClient({ userRole }: { userRole: Role }) {
           {canEdit && (
             <Button
               variant="white"
-              className="!min-h-0 !px-4 !py-2 !text-xs shrink-0"
+              className="w-full !px-4 !py-2 !text-xs sm:w-auto sm:shrink-0"
               onClick={() => tab === "trucks" ? setShowAddTruck(true) : setShowAddDriver(true)}
             >
               <Plus size={13} /> Add {tab === "trucks" ? "Truck" : "Driver"}
@@ -226,9 +226,9 @@ export function FleetPageClient({ userRole }: { userRole: Role }) {
             </button>
           ))}
         </div>
-        <div className="relative">
+        <div className="relative w-full sm:w-auto">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
-          <input className="input-premium pl-9 text-sm w-56"
+          <input className="input-premium w-full pl-9 text-sm sm:w-56"
             placeholder={tab === "trucks" ? "Search plate or model…" : "Search name, phone…"}
             value={search} onChange={e => setSearch(e.target.value)} />
         </div>
@@ -247,7 +247,7 @@ export function FleetPageClient({ userRole }: { userRole: Role }) {
                 <p className="text-xs text-muted mt-1">{canEdit ? "Click \"Add Truck\" to register your first vehicle." : "No trucks registered."}</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm">
+              <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-sm admin-scroll">
                 <table className="w-full min-w-[600px] text-left text-sm">
                   <thead className="border-b border-line bg-slate-50 text-[11px] font-bold uppercase tracking-wide text-muted">
                     <tr>
@@ -295,15 +295,15 @@ export function FleetPageClient({ userRole }: { userRole: Role }) {
                               <div className="flex gap-1">
                                 <button onClick={() => { setAssignTruck(truck); setAssignDriverId(truck.assignedDriverId || ""); }}
                                   title="Assign / change driver"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition">
+                                  className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 transition">
                                   <Link2 size={13} />
                                 </button>
                                 <button onClick={() => { setEditTruck(truck); setEditTruckForm({ plateNumber: truck.plateNumber, model: truck.model, capacity: String(truck.capacity), notes: truck.notes || "" }); }}
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition">
+                                  className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition">
                                   <Edit2 size={13} />
                                 </button>
                                 <button onClick={() => handleToggleTruck(truck)}
-                                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${truck.active ? "text-slate-400 hover:bg-red-50 hover:text-red-600" : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"}`}>
+                                  className={`flex h-11 w-11 items-center justify-center rounded-xl transition ${truck.active ? "text-slate-400 hover:bg-red-50 hover:text-red-600" : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"}`}>
                                   {truck.active ? <PowerOff size={13} /> : <Power size={13} />}
                                 </button>
                               </div>
@@ -333,13 +333,13 @@ export function FleetPageClient({ userRole }: { userRole: Role }) {
             ) : (
               <div className="space-y-2">
                 {filteredDrivers.map(driver => (
-                  <div key={driver.id} className={`flex items-center gap-3 rounded-2xl border border-line bg-white p-4 shadow-sm transition hover:shadow-md ${!driver.active ? "opacity-50" : ""}`}>
+                  <div key={driver.id} className={`flex flex-wrap items-center gap-3 rounded-2xl border border-line bg-white p-4 shadow-sm transition hover:shadow-md sm:flex-nowrap ${!driver.active ? "opacity-50" : ""}`}>
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-sm font-bold text-white shadow">
                       {driver.name.slice(0, 1).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-bold text-navy-900 text-sm">{driver.name}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="break-words font-bold text-navy-900 text-sm">{driver.name}</p>
                         <Badge tone={driver.active ? "ok" : "neutral"}>{driver.active ? "Active" : "Inactive"}</Badge>
                       </div>
                       <div className="mt-0.5 flex flex-wrap gap-3 text-xs text-muted">
@@ -352,11 +352,11 @@ export function FleetPageClient({ userRole }: { userRole: Role }) {
                     {canEdit && (
                       <div className="flex shrink-0 gap-1">
                         <button onClick={() => { setEditDriver(driver); setEditDriverForm({ name: driver.name, phone: driver.phone || "", licenseNo: driver.licenseNo || "", notes: driver.notes || "" }); }}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition">
+                          className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition">
                           <Edit2 size={13} />
                         </button>
                         <button onClick={() => handleToggleDriver(driver)}
-                          className={`flex h-8 w-8 items-center justify-center rounded-lg transition ${driver.active ? "text-slate-400 hover:bg-red-50 hover:text-red-600" : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"}`}>
+                          className={`flex h-11 w-11 items-center justify-center rounded-xl transition ${driver.active ? "text-slate-400 hover:bg-red-50 hover:text-red-600" : "text-slate-400 hover:bg-emerald-50 hover:text-emerald-600"}`}>
                           {driver.active ? <PowerOff size={13} /> : <Power size={13} />}
                         </button>
                       </div>

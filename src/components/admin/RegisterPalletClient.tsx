@@ -123,7 +123,7 @@ export function RegisterPalletClient({
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-5"
           >
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-center">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-center sm:p-6">
               <CheckCircle2 size={52} className="mx-auto text-emerald-500" />
               <h2 className="mt-3 font-display text-xl font-bold text-emerald-900">
                 {registeredPallet.palletNumber}
@@ -135,7 +135,7 @@ export function RegisterPalletClient({
 
             {/* Print preview */}
             <Card>
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <p className="print-hide text-xs font-bold uppercase tracking-wide text-muted">
                   Print preview — {printCount} label{printCount === 1 ? "" : "s"}
                 </p>
@@ -190,7 +190,7 @@ export function RegisterPalletClient({
               </div>
             </Card>
 
-            <div className="print-hide flex gap-3">
+            <div className="print-hide flex flex-col gap-3 sm:flex-row">
               <Button fullWidth onClick={() => window.print()} className="!min-h-[48px]">
                 <Printer size={16} /> Print {printCount} label{printCount === 1 ? "" : "s"}
               </Button>
@@ -218,7 +218,7 @@ export function RegisterPalletClient({
             </div>
 
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wide text-muted">
                     Pallet # <span className="font-normal text-slate-400">(optional — auto-generated)</span>
@@ -260,7 +260,7 @@ export function RegisterPalletClient({
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="text-xs font-bold uppercase tracking-wide text-muted">
                     Dimensions *

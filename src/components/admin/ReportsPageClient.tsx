@@ -103,13 +103,13 @@ export function ReportsPageClient({ initialPalletCount }: { initialPalletCount: 
       </div>
 
       {/* Date filter */}
-      <div className="flex flex-wrap items-center gap-3 premium-card !p-4">
+      <div className="flex flex-col items-stretch gap-3 premium-card !p-4 sm:flex-row sm:flex-wrap sm:items-center">
         <span className="text-xs font-bold uppercase text-muted">Date Range:</span>
-        <div className="flex items-center gap-2">
+        <div className="grid grid-cols-[auto_1fr] items-center gap-2 sm:flex">
           <label className="text-xs text-muted">From</label>
           <input type="date" className="input-premium text-sm" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="grid grid-cols-[auto_1fr] items-center gap-2 sm:flex">
           <label className="text-xs text-muted">To</label>
           <input type="date" className="input-premium text-sm" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
         </div>
@@ -121,7 +121,7 @@ export function ReportsPageClient({ initialPalletCount }: { initialPalletCount: 
       </div>
 
       {/* Report cards */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {REPORTS.map((r, i) => (
           <motion.div
             key={r.id}
@@ -171,16 +171,16 @@ export function ReportsPageClient({ initialPalletCount }: { initialPalletCount: 
             className="premium-card !p-0 overflow-hidden"
           >
             {/* Results header */}
-            <div className="flex items-center justify-between gap-3 border-b border-line p-4">
-              <div>
+            <div className="flex flex-col gap-3 border-b border-line p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <h2 className="font-display font-bold text-navy-900">{activeReportName}</h2>
                 <p className="text-xs text-muted">{result.total} records{dateFrom || dateTo ? ` · filtered ${dateFrom || "…"} → ${dateTo || "…"}` : ""}</p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Button variant="secondary" className="!min-h-0 !px-3 !py-1.5 !text-xs" onClick={handleExportCSV}>
                   <Download size={12} /> Export CSV
                 </Button>
-                <button onClick={() => { setResult(null); setActiveReport(null); }} className="text-muted hover:text-ink">
+                <button aria-label="Close report results" onClick={() => { setResult(null); setActiveReport(null); }} className="flex h-11 w-11 items-center justify-center rounded-xl text-muted hover:bg-slate-100 hover:text-ink">
                   <X size={16} />
                 </button>
               </div>

@@ -6,14 +6,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PageReveal } from "@/components/motion/PageReveal";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminDataToolbar, type DataViewMode } from "@/components/admin/AdminDataToolbar";
 import { PalletQrLabel } from "@/components/admin/PalletQrLabel";
 import { STATUS_LABELS, STATUS_COLORS, type PalletStatus } from "@/lib/pallet-machine";
-import { formatDate } from "@/lib/format-date";
 import {
   AlertTriangle,
   Ban,
@@ -283,12 +281,12 @@ export function AdminPalletsClient({
         subtitle={`${kpis.active} active · ${kpis.available} available · ${kpis.inTransit} in transit`}
         badge="lifecycle"
         actions={
-          <div className="flex gap-2">
-            <Link href="/admin/scan"><Button variant="white"><QrCode size={16} /> Scan</Button></Link>
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap">
+            <Link href="/admin/scan" className="contents sm:block"><Button variant="white" className="w-full"><QrCode size={16} /> Scan</Button></Link>
             {canRegister && (
               <>
                 <Button variant="white" onClick={() => setShowRegister(true)}><Plus size={16} /> Register pallet</Button>
-                <Link href="/admin/pallets/labels"><Button variant="white"><Printer size={16} /> Print labels</Button></Link>
+                <Link href="/admin/pallets/labels" className="contents sm:block"><Button variant="white" className="w-full"><Printer size={16} /> Print labels</Button></Link>
               </>
             )}
           </div>
@@ -296,7 +294,7 @@ export function AdminPalletsClient({
       />
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <KpiCard label="Active" value={kpis.active} gradient="from-blue-500 to-blue-700" icon={Package} />
         <KpiCard label="Available" value={kpis.available} gradient="from-emerald-500 to-emerald-700" icon={CheckCircle2} />
         <KpiCard label="In transit" value={kpis.inTransit} gradient="from-violet-500 to-purple-700" icon={Truck} />
@@ -504,7 +502,7 @@ export function AdminPalletsClient({
           {/* Section: Details */}
           <div>
             <p className="mb-2 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest text-muted"><Package size={11} /> Pallet Details</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <label className="text-[11px] font-bold text-muted">Manufacture Date</label>
                 <input type="date" className="input-premium mt-1 w-full text-sm" value={regForm.manufactureDate} onChange={(e) => setRegForm({ ...regForm, manufactureDate: e.target.value })} />
@@ -526,7 +524,7 @@ export function AdminPalletsClient({
             </div>
           </div>
           {/* Section: Financial */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="text-[11px] font-bold text-muted">Cost (OMR)</label>
               <input type="number" step="0.01" className="input-premium mt-1 w-full text-sm" placeholder="25.00" value={regForm.cost} onChange={(e) => setRegForm({ ...regForm, cost: e.target.value })} />
@@ -537,20 +535,20 @@ export function AdminPalletsClient({
             </div>
           </div>
           {/* Quantity */}
-          <div className="flex items-center gap-4 rounded-xl border border-line bg-slate-50 px-4 py-3">
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-slate-50 px-3 py-3 sm:px-4">
             <p className="text-xs font-bold text-navy-900">Quantity</p>
-            <div className="flex items-center gap-3 ml-auto">
+            <div className="ml-auto flex items-center gap-2 sm:gap-3">
               <button onClick={() => setRegCount(Math.max(1, regCount - 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition font-bold text-base">−</button>
               <span className="w-8 text-center font-mono text-xl font-bold text-navy-900">{regCount}</span>
               <button onClick={() => setRegCount(Math.min(50, regCount + 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 transition font-bold text-base">+</button>
             </div>
-            <div className="flex gap-1 ml-3">
+            <div className="grid w-full grid-cols-4 gap-1 sm:ml-3 sm:flex sm:w-auto">
               {[1, 5, 10, 25].map(n => (
                 <button key={n} onClick={() => setRegCount(n)} className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${regCount === n ? "bg-navy-900 text-white" : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"}`}>{n}</button>
               ))}
             </div>
           </div>
-          <div className="flex gap-2 pt-1">
+          <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row">
             <Button variant="secondary" fullWidth onClick={() => setShowRegister(false)}>Cancel</Button>
             <Button fullWidth disabled={regSubmitting} onClick={handleRegister}>
               {regSubmitting ? "Registering…" : `Generate ${regCount} QR Code${regCount > 1 ? "s" : ""}`} <ArrowRight size={16} />
@@ -564,7 +562,7 @@ export function AdminPalletsClient({
         <div className="space-y-4">
           <div className="rounded-xl bg-red-50 p-3 text-xs font-semibold text-red-900 ring-1 ring-red-100">
             <AlertTriangle size={14} className="mr-1 inline" />
-            Voiding a pallet marks it as permanently lost. It will disappear from the active list and only appear under the "Voided" filter.
+            Voiding a pallet marks it as permanently lost. It will disappear from the active list and only appear under the &quot;Voided&quot; filter.
           </div>
           <div>
             <label className="text-xs font-bold uppercase tracking-wide text-muted">Reason</label>
@@ -589,7 +587,7 @@ export function AdminPalletsClient({
         {printModalPallet && (
           <div className="space-y-4">
             <div className="print-sheet rounded-2xl bg-slate-100/80 p-4 ring-1 ring-line">
-              <div className="print-grid grid grid-cols-2 gap-4">
+              <div className="print-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {Array.from({ length: printCount }).map((_, i) => (
                   <div key={i} className="print-label flex justify-center">
                     <PalletQrLabel palletNumber={printModalPallet.palletNumber} qrData={printModalPallet.qrCode} materialType={printModalPallet.materialType} dimensions={printModalPallet.dimensions} />

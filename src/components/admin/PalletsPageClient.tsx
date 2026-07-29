@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PageReveal } from "@/components/motion/PageReveal";
@@ -26,11 +26,10 @@ const STATUS_OPTIONS = [
 ];
 
 export function PalletsPageClient({ initialPallets }: { initialPallets: Pallet[] }) {
-  const [pallets, setPallets] = useState<Pallet[]>(initialPallets);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  useEffect(() => {
+  const pallets = useMemo(() => {
     let filtered = initialPallets;
     if (search) {
       const q = search.toLowerCase();
@@ -44,7 +43,7 @@ export function PalletsPageClient({ initialPallets }: { initialPallets: Pallet[]
     if (statusFilter) {
       filtered = filtered.filter((p) => p.status === statusFilter);
     }
-    setPallets(filtered);
+    return filtered;
   }, [search, statusFilter, initialPallets]);
 
   return (
@@ -59,12 +58,12 @@ export function PalletsPageClient({ initialPallets }: { initialPallets: Pallet[]
               {initialPallets.length} pallets registered · Search by number, material, or location.
             </p>
           </div>
-          <a
+          <Link
             href="/admin/pallets/register"
-            className="inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-navy-900 shadow-md"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-xs font-bold text-navy-900 shadow-md sm:w-auto"
           >
             + Register pallet
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -121,20 +120,20 @@ export function PalletsPageClient({ initialPallets }: { initialPallets: Pallet[]
                   <span className="text-xs font-bold">{p.palletNumber.slice(-3)}</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-navy-900 mono-code">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="truncate text-sm font-bold text-navy-900 mono-code">
                       {p.palletNumber}
                     </p>
                     <Badge tone={(STATUS_COLORS[p.status as keyof typeof STATUS_COLORS] || "neutral") as "ok" | "teal" | "blue" | "neutral" | "field" | "dispatch" | "warn" | "danger"}>
                       {STATUS_LABELS[p.status as keyof typeof STATUS_LABELS] || p.status}
                     </Badge>
                   </div>
-                  <p className="mt-0.5 text-xs text-muted">
+                  <p className="mt-0.5 truncate text-xs text-muted">
                     {p.materialType} · {p.dimensions} · {p.tripCount} trips
                     {p.currentLocation ? ` · ${p.currentLocation}` : ""}
                   </p>
                 </div>
-                <span className="text-xs text-muted opacity-0 transition group-hover:opacity-100">
+                <span className="shrink-0 text-xs text-muted sm:opacity-0 sm:transition sm:group-hover:opacity-100">
                   View →
                 </span>
               </Link>

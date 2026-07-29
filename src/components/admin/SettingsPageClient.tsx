@@ -225,7 +225,7 @@ export function SettingsPageClient({
       </div>
 
       {/* ── SECTION 1: Operational ── */}
-      <div className="premium-card !p-6">
+      <div className="premium-card !p-4 sm:!p-6">
         <SectionHeader
           icon={<RotateCcw size={18} />}
           title="Operational Rules"
@@ -237,7 +237,7 @@ export function SettingsPageClient({
             label="Return window"
             description="Days until a delivered pallet is overdue"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <input
                 type="number"
                 min="1"
@@ -255,7 +255,7 @@ export function SettingsPageClient({
             label="Low inventory alert"
             description="Alert when available pallets fall below this"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <input
                 type="number"
                 min="1"
@@ -276,7 +276,7 @@ export function SettingsPageClient({
       </div>
 
       {/* ── SECTION 2: Pallet Material Types ── */}
-      <div className="premium-card !p-6">
+      <div className="premium-card !p-4 sm:!p-6">
         <SectionHeader
           icon={<Package size={18} />}
           title="Pallet Material Types"
@@ -300,7 +300,7 @@ export function SettingsPageClient({
             </span>
           ))}
         </div>
-        <div className="mt-4 flex gap-2 max-w-xs">
+        <div className="mt-4 flex max-w-xs gap-2">
           <input
             className="input-premium flex-1 text-sm"
             placeholder="e.g. aluminium"
@@ -320,7 +320,7 @@ export function SettingsPageClient({
       </div>
 
       {/* ── SECTION 3: Label & Branding ── */}
-      <div className="premium-card !p-6">
+      <div className="premium-card !p-4 sm:!p-6">
         <SectionHeader
           icon={<Tag size={18} />}
           title="Label &amp; Branding"
@@ -387,15 +387,15 @@ export function SettingsPageClient({
             >
               QR
             </div>
-            <div>
-              <p className="font-bold text-sm" style={{ color: accentColor }}>
+            <div className="min-w-0">
+              <p className="break-words font-bold text-sm" style={{ color: accentColor }}>
                 {companyName || "Company Name"}
               </p>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <p className="break-words text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 {tagline || "Tagline"}
               </p>
               <p className="mt-1 font-mono text-[11px] font-bold text-slate-800">PT-XXXXXX</p>
-              <p className="text-[9px] uppercase tracking-widest text-slate-400 mt-0.5">
+              <p className="mt-0.5 break-words text-[9px] uppercase tracking-widest text-slate-400">
                 {footerText || "footer text"}
               </p>
             </div>
@@ -410,7 +410,7 @@ export function SettingsPageClient({
       </div>
 
       {/* ── SECTION 4: Database & Testing ── */}
-      <div className="premium-card !p-6">
+      <div className="premium-card !p-4 sm:!p-6">
         <SectionHeader
           icon={<Database size={18} />}
           title="Database &amp; Testing"
@@ -428,7 +428,7 @@ export function SettingsPageClient({
             </div>
             <button
               onClick={() => { setDbAction("seed_pallets"); setDbConfirmText(""); setDbResult(null); }}
-              className="shrink-0 flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition">
+               className="flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition sm:w-auto">
               <FlaskConical size={13} /> Seed Demo Data
             </button>
           </div>
@@ -444,7 +444,7 @@ export function SettingsPageClient({
             </div>
             <button
               onClick={() => { setDbAction("clear_pallets"); setDbConfirmText(""); setDbResult(null); }}
-              className="shrink-0 flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 transition">
+               className="flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 transition sm:w-auto">
               <Trash2 size={13} /> Clear Pallets
             </button>
           </div>
@@ -460,7 +460,7 @@ export function SettingsPageClient({
             </div>
             <button
               onClick={() => { setDbAction("clear_audit"); setDbConfirmText(""); setDbResult(null); }}
-              className="shrink-0 flex items-center gap-2 rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white hover:bg-orange-700 transition">
+               className="flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-orange-600 px-4 py-2 text-xs font-bold text-white hover:bg-orange-700 transition sm:w-auto">
               <RotateCcw size={13} /> Clear Audit Log
             </button>
           </div>
@@ -475,8 +475,8 @@ export function SettingsPageClient({
 
       {/* ── Confirm Dialog ── */}
       {dbAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-950/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-navy-950/60 p-2 pb-[max(.5rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="max-h-[calc(100dvh-1rem)] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl sm:p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-100">
                 <ShieldAlert size={18} className="text-red-600" />
@@ -502,7 +502,7 @@ export function SettingsPageClient({
               value={dbConfirmText}
               onChange={e => setDbConfirmText(e.target.value.toUpperCase())}
             />
-            <div className="flex gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <button onClick={() => { setDbAction(null); setDbConfirmText(""); }}
                 className="flex-1 rounded-xl border border-line bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 transition">
                 Cancel
@@ -524,7 +524,7 @@ export function SettingsPageClient({
       )}
 
       {/* ── SECTION 5: Coming Soon ── */}
-      <div className="premium-card !p-6 opacity-60 pointer-events-none select-none">
+      <div className="premium-card !p-4 opacity-60 pointer-events-none select-none sm:!p-6">
         <SectionHeader
           icon={<Settings size={18} />}
           title="Email Notifications"

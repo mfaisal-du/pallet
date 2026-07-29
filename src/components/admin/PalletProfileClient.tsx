@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { PageReveal } from "@/components/motion/PageReveal";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -216,7 +215,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
         title={pallet.palletNumber}
         subtitle={`${pallet.materialType} · ${pallet.dimensions} · ${pallet.tripCount} trips`}
         actions={
-          <div className="flex gap-2">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             {transitions.length > 0 && (
               <Button variant="white" onClick={() => openAction(transitions[0])}>
                 <ArrowRight size={16} /> Perform action
@@ -229,9 +228,9 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
         }
       />
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 xl:grid-cols-3">
         {/* Left column — QR + Info */}
-        <div className="space-y-4 lg:col-span-1">
+        <div className="space-y-4 xl:col-span-1">
           {/* QR Label */}
           <div className="flex justify-center rounded-[1.35rem] bg-white p-4 shadow-lg ring-1 ring-line">
             <PalletQrLabel
@@ -313,7 +312,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
         </div>
 
         {/* Right column — Timeline + Damage */}
-        <div className="space-y-4 lg:col-span-2">
+        <div className="space-y-4 xl:col-span-2">
           {/* Movement Timeline */}
           <div className="premium-card !p-5 ring-1 ring-line/80">
             <div className="mb-4 flex items-center gap-2">
@@ -367,7 +366,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
                               <ActionIcon size={10} />
                             </span>
                             <div className="rounded-xl bg-surface/40 px-3 py-2.5 ring-1 ring-line/50">
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-2">
                                 <span className="text-sm font-bold capitalize text-navy-900">
                                   {m.action.replace(/_/g, " ")}
                                 </span>
@@ -423,8 +422,8 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
                   >
                     <AlertTriangle size={14} className={`mt-0.5 shrink-0 ${d.resolved ? "text-emerald-500" : "text-red-500"}`} />
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm text-ink">{d.description}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="break-words text-sm text-ink">{d.description}</p>
                         <Badge tone={d.resolved ? "ok" : "danger"}>
                           {d.resolved ? "Resolved" : "Open"}
                         </Badge>
@@ -500,7 +499,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
               <div className="space-y-2">
                 <p className="text-xs font-bold uppercase text-muted">Products loaded onto pallet</p>
                 {products.map((p, i) => (
-                  <div key={i} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <div key={i} className="grid grid-cols-1 gap-2 sm:grid-cols-4">
                     <input className="input-premium text-xs" placeholder="SKU" value={p.sku}
                       onChange={(e) => { const n = [...products]; n[i] = { ...n[i], sku: e.target.value }; setProducts(n); }} />
                     <input type="number" className="input-premium text-xs" placeholder="Qty" value={p.qty}
@@ -524,7 +523,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
             {/* DISPATCH form */}
             {activeAction.action === "dispatch" && (
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className="text-xs font-bold uppercase text-muted">Truck Number *</label>
                     <input className="input-premium mt-1 text-sm" placeholder="TK-001" value={dispatchForm.truckNumber}
@@ -536,7 +535,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
                       onChange={(e) => setDispatchForm({ ...dispatchForm, driverName: e.target.value })} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className="text-xs font-bold uppercase text-muted">Driver Contact</label>
                     <input className="input-premium mt-1 text-sm" placeholder="+968 XXX XXXX" value={dispatchForm.driverContact}
@@ -559,7 +558,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
             {/* DELIVER form */}
             {activeAction.action === "deliver" && (
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
                     <label className="text-xs font-bold uppercase text-muted">Receiver Name *</label>
                     <input className="input-premium mt-1 text-sm" placeholder="Receiver name" value={deliverForm.receiverName}
@@ -584,7 +583,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
                 </div>
                 <div>
                   <label className="text-xs font-bold uppercase text-muted">Condition *</label>
-                  <div className="mt-2 flex gap-3">
+                  <div className="mt-2 flex flex-wrap gap-3">
                     {["Good", "Damaged", "Unknown"].map((c) => (
                       <label key={c} className="flex cursor-pointer items-center gap-2">
                         <input type="radio" name="pickup-cond" value={c} checked={pickupForm.condition === c}
@@ -607,7 +606,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
                 </div>
                 <div>
                   <label className="text-xs font-bold uppercase text-muted">Condition *</label>
-                  <div className="mt-2 flex gap-3">
+                  <div className="mt-2 flex flex-wrap gap-3">
                     {["Good", "Damaged"].map((c) => (
                       <label key={c} className="flex cursor-pointer items-center gap-2">
                         <input type="radio" name="receive-cond" value={c} checked={receiveForm.condition === c}
@@ -647,7 +646,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
               </div>
             )}
 
-            <div className="flex gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button variant="secondary" fullWidth onClick={() => setShowAction(false)}>Cancel</Button>
               <Button fullWidth disabled={submitting} onClick={handleAction}>
                 {submitting ? <><Loader2 size={15} className="animate-spin" /> Processing…</> : activeAction.formLabel}
@@ -668,7 +667,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
         <div className="space-y-4">
           {/* Print preview */}
           <div className="print-sheet rounded-2xl bg-slate-100/80 p-4 ring-1 ring-line">
-            <div className="print-grid grid grid-cols-2 gap-4">
+            <div className="print-grid grid grid-cols-1 gap-4 sm:grid-cols-2">
               {Array.from({ length: printCount }).map((_, i) => (
                 <div key={i} className="print-label flex justify-center">
                   <PalletQrLabel
@@ -717,7 +716,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
             ))}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row">
             <Button variant="secondary" fullWidth onClick={() => setShowPrintModal(false)}>
               Cancel
             </Button>
@@ -743,10 +742,10 @@ function DetailRow({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-start gap-3">
       <Icon size={14} className="shrink-0 text-muted" />
       <span className="w-24 shrink-0 text-[11px] font-bold uppercase text-muted">{label}</span>
-      <span className={`text-sm text-ink ${mono ? "mono-code" : ""}`}>{value}</span>
+      <span className={`min-w-0 break-words text-sm text-ink ${mono ? "mono-code" : ""}`}>{value}</span>
     </div>
   );
 }

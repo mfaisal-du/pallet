@@ -427,6 +427,23 @@ h3,
   padding-top: max(0.75rem, env(safe-area-inset-top));
 }
 
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea,
+  .input-premium {
+    font-size: 1rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

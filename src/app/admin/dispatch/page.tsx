@@ -68,7 +68,6 @@ export default async function DispatchPage() {
         }))}
         activeTrucks={trucks.map(t => ({ id: t.id, plateNumber: t.plateNumber, model: t.model, assignedDriverId: t.assignedDriverId || null }))}
         activeDrivers={drivers.map(d => ({ id: d.id, name: d.name, phone: d.phone || null }))}
-        userRole={session.user.role}
       />
     </AdminShell>
   );

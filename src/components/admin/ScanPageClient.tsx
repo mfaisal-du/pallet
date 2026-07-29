@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageReveal } from "@/components/motion/PageReveal";
 import { ScannerView } from "@/components/ui/ScannerView";
@@ -193,8 +194,8 @@ export function ScanPageClient({ userRole }: { userRole?: Role }) {
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
-        <div className="relative z-10 flex items-start justify-between gap-4">
-          <div>
+        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <span className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-sky-100 backdrop-blur-md">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-300 opacity-75" />
@@ -210,12 +211,12 @@ export function ScanPageClient({ userRole }: { userRole?: Role }) {
             </p>
           </div>
           {canRegister && (
-            <a
+            <Link
               href="/admin/pallets/register"
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-md hover:bg-white/20 transition"
+              className="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/20 sm:w-auto sm:shrink-0"
             >
               <Package size={13} /> Register new pallet
-            </a>
+            </Link>
           )}
         </div>
       </div>
@@ -412,7 +413,7 @@ function ActionForm({
         <div className="space-y-3">
           <p className="text-xs font-bold uppercase text-muted">Products loaded onto pallet</p>
           {products.map((p, i) => (
-            <div key={i} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div key={i} className="grid grid-cols-1 gap-2 sm:grid-cols-4">
               <input className="input-premium text-xs" placeholder="SKU / Product" value={p.sku}
                 onChange={(e) => { const n = [...products]; n[i] = { ...n[i], sku: e.target.value }; setProducts(n); }} />
               <input type="number" className="input-premium text-xs" placeholder="Qty" value={p.qty}
@@ -438,7 +439,7 @@ function ActionForm({
 
       {action === "dispatch" && (
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="text-xs font-bold uppercase text-muted">Truck *</label>
               {fleetTrucks.length > 0 ? (
@@ -483,7 +484,7 @@ function ActionForm({
               )}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="text-xs font-bold uppercase text-muted">Driver Contact</label>
               <input className="input-premium mt-1 text-sm" placeholder="+968 XXX XXXX" value={dispatchForm.driverContact}
@@ -513,7 +514,7 @@ function ActionForm({
 
       {action === "deliver" && (
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="text-xs font-bold uppercase text-muted">Receiver Name *</label>
               <input className="input-premium mt-1 text-sm" placeholder="Receiver name" value={deliverForm.receiverName}
@@ -545,7 +546,7 @@ function ActionForm({
           </div>
           <div>
             <label className="text-xs font-bold uppercase text-muted">Pallet Condition *</label>
-            <div className="mt-2 flex gap-4">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
               {["Good", "Damaged", "Unknown"].map((c) => (
                 <label key={c} className="flex cursor-pointer items-center gap-2">
                   <input type="radio" name="pickup-condition" value={c} checked={pickupForm.condition === c}
@@ -575,7 +576,7 @@ function ActionForm({
           </div>
           <div>
             <label className="text-xs font-bold uppercase text-muted">Condition *</label>
-            <div className="mt-2 flex gap-4">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
               {["Good", "Damaged"].map((c) => (
                 <label key={c} className="flex cursor-pointer items-center gap-2">
                   <input type="radio" name="receive-condition" value={c} checked={receiveForm.condition === c}

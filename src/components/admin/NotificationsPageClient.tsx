@@ -50,13 +50,16 @@ export function NotificationsPageClient() {
   }
 
   useEffect(() => {
-    loadNotifications();
+    const initial = window.setTimeout(loadNotifications, 0);
 
     const interval = window.setInterval(() => {
       loadNotifications();
     }, 5000);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      window.clearTimeout(initial);
+      window.clearInterval(interval);
+    };
   }, []);
 
   async function markAllRead() {
@@ -83,8 +86,8 @@ export function NotificationsPageClient() {
   return (
     <PageReveal className="space-y-6">
       <div className="relative isolate overflow-hidden rounded-[1.6rem] bg-gradient-to-br from-navy-950 via-blue-900 to-blue-700 p-5 text-white shadow-xl sm:p-6">
-        <div className="relative z-10 flex items-start justify-between">
-          <div>
+        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
               Notifications
             </h1>
@@ -93,7 +96,7 @@ export function NotificationsPageClient() {
             </p>
           </div>
           {unread > 0 && (
-            <Button variant="white" className="!min-h-0 !px-3 !py-1.5 !text-xs" onClick={markAllRead}>
+            <Button variant="white" className="w-full !px-3 !py-1.5 !text-xs sm:w-auto" onClick={markAllRead}>
               <CheckCheck size={14} /> Mark all read
             </Button>
           )}
@@ -133,14 +136,14 @@ export function NotificationsPageClient() {
                       <span className="h-2 w-2 rounded-full bg-blue-500" />
                     )}
                   </div>
-                  <h3 className="mt-1.5 text-sm font-bold text-navy-900">{n.title}</h3>
-                  <p className="mt-0.5 text-xs text-muted">{n.message}</p>
+                  <h3 className="mt-1.5 break-words text-sm font-bold text-navy-900">{n.title}</h3>
+                  <p className="mt-0.5 break-words text-xs text-muted">{n.message}</p>
                   <p className="mt-1 text-[10px] text-muted">{formatDateTime(n.createdAt)}</p>
                 </div>
                 {!n.read && (
                   <button
                     onClick={() => markRead(n.id)}
-                    className="shrink-0 text-muted hover:text-ink"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-muted hover:bg-white hover:text-ink"
                     title="Mark as read"
                   >
                     <BellOff size={14} />
