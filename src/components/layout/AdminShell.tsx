@@ -289,9 +289,9 @@ export function AdminShell({
               </div>
 
               <div className="flex shrink-0 items-center gap-2.5 rounded-2xl border border-line/80 bg-white/80 px-2.5 py-2 shadow-sm">
-                <div className="hidden text-right sm:block">
-                  <p className="text-xs font-bold text-slate-900">{userName}</p>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <div className="max-w-[6.5rem] min-w-0 text-right sm:max-w-[12rem]" title={userName}>
+                  <p className="truncate text-xs font-bold text-slate-900">{userName}</p>
+                  <p className="hidden truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 sm:block">
                     {roleLabel(userRole)}
                   </p>
                 </div>

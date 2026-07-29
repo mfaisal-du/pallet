@@ -188,7 +188,7 @@ export function AdminDashboardClient({
       </motion.section>
 
       {/* KPI tiles */}
-      <StaggerList className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <StaggerList className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         {tiles.map((t) => (
           <StaggerItem key={t.label}>
             <Link href={t.href} className="group block">
