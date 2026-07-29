@@ -9,7 +9,7 @@ export default async function ScanPage() {
 
   return (
     <AdminShell userName={session.user.name} userRole={session.user.role}>
-      <ScanPageClient userRole={session.user.role} />
+      <ScanPageClient userName={session.user.name} userRole={session.user.role} />
     </AdminShell>
   );
 }

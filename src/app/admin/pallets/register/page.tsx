@@ -24,7 +24,11 @@ export default async function RegisterPalletPage() {
 
   return (
     <AdminShell userName={session.user.name} userRole={session.user.role}>
-      <RegisterPalletClient labelConfig={labelConfig} materialTypes={materialTypes} />
+      <RegisterPalletClient
+        userName={session.user.name}
+        labelConfig={labelConfig}
+        materialTypes={materialTypes}
+      />
     </AdminShell>
   );
 }

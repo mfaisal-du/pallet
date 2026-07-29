@@ -53,7 +53,13 @@ const ACTION_ICONS: Record<string, typeof Truck> = {
   retire: XCircle,
 };
 
-export function ScanPageClient({ userRole }: { userRole?: Role }) {
+export function ScanPageClient({
+  userName,
+  userRole,
+}: {
+  userName: string;
+  userRole: Role;
+}) {
   const toast = useToast();
   const canRegister = userRole === "administrator" || userRole === "manufacturing";
 
@@ -203,6 +209,9 @@ export function ScanPageClient({ userRole }: { userRole?: Role }) {
               </span>
               Live Scanner
             </span>
+            <p className="mb-1 text-xs font-semibold text-sky-100/90">
+              Welcome, <span className="font-bold text-white">{userName}</span>
+            </p>
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
               Scan Pallet
             </h1>

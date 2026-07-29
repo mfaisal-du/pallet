@@ -19,9 +19,11 @@ import {
 } from "lucide-react";
 
 export function RegisterPalletClient({
+  userName,
   labelConfig,
   materialTypes = ["plastic", "wood", "metal", "composite"],
 }: {
+  userName: string;
   labelConfig: LabelConfig;
   materialTypes?: string[];
 }) {
@@ -106,6 +108,9 @@ export function RegisterPalletClient({
             </span>
             Manufacturing
           </span>
+          <p className="mb-1 text-xs font-semibold text-emerald-100/90">
+            Welcome, <span className="font-bold text-white">{userName}</span>
+          </p>
           <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
             Register New Pallet
           </h1>
