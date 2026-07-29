@@ -10,7 +10,6 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 const DISMISSED_KEY = "pwa-install-dismissed-at";
-const INSTALLED_KEY = "pwa-install-observed";
 const DISMISS_FOR_MS = 7 * 24 * 60 * 60 * 1000;
 
 function isAppleMobileDevice() {
@@ -31,11 +30,7 @@ export function PwaInstallPrompt() {
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
-    if (isStandalone) {
-      window.localStorage.setItem(INSTALLED_KEY, "1");
-      return;
-    }
-    if (window.localStorage.getItem(INSTALLED_KEY) === "1") return;
+    if (isStandalone) return;
 
     const dismissedAt = Number(window.localStorage.getItem(DISMISSED_KEY) || 0);
     const recentlyDismissed = Date.now() - dismissedAt < DISMISS_FOR_MS;
@@ -50,7 +45,6 @@ export function PwaInstallPrompt() {
     const handleAppInstalled = () => {
       setVisible(false);
       setDeferredPrompt(null);
-      window.localStorage.setItem(INSTALLED_KEY, "1");
       window.localStorage.removeItem(DISMISSED_KEY);
     };
 
