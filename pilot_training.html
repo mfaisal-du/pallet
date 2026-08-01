@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PalletTrack Pro — Pilot Training Guide</title>
+  <style>
+    :root {
+      --navy: #0b1524;
+      --navy2: #152844;
+      --blue: #1e40af;
+      --sky: #0ea5e9;
+      --emerald: #059669;
+      --violet: #7c3aed;
+      --amber: #d97706;
+      --red: #dc2626;
+      --orange: #ea580c;
+      --slate: #64748b;
+      --line: #e2e8f0;
+      --surface: #f8fafc;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f4f8;
+      color: #1e293b;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── COVER ── */
+    .cover {
+      background: linear-gradient(135deg, #0b1524 0%, #152844 40%, #1e40af 100%);
+      color: white;
+      padding: 60px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 0%, rgba(14,165,233,0.2) 0%, transparent 70%);
+    }
+    .cover-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 14px;
+      padding: 10px 20px;
+      margin-bottom: 32px;
+      position: relative;
+    }
+    .cover-logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .cover-logo-text { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+    .cover-logo-sub  { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; opacity: 0.6; display: block; }
+    .cover h1 { font-size: 38px; font-weight: 900; letter-spacing: -1px; position: relative; margin-bottom: 12px; }
+    .cover h1 span { color: #7dd3fc; }
+    .cover p.lead { font-size: 16px; color: rgba(255,255,255,0.75); max-width: 600px; margin: 0 auto 32px; position: relative; }
+    .cover-meta {
+      display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+      position: relative; font-size: 12px; color: rgba(255,255,255,0.55);
+    }
+    .cover-meta span { display: flex; align-items: center; gap: 6px; }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 1000px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── TOC ── */
+    .toc {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .toc h2 { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: var(--slate); margin-bottom: 16px; }
+    .toc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+    .toc a {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 10px;
+      background: var(--surface); border: 1px solid var(--line);
+      color: var(--navy); font-weight: 600; font-size: 13px;
+      text-decoration: none; transition: all .15s;
+    }
+    .toc a:hover { background: #dbeafe; border-color: #93c5fd; color: var(--blue); }
+    .toc-num {
+      width: 22px; height: 22px; border-radius: 8px;
+      background: var(--navy); color: white;
+      font-size: 10px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .section-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--line);
+    }
+    .section-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .section-header h2 { font-size: 18px; font-weight: 800; color: var(--navy); margin-bottom: 2px; }
+    .section-header p  { font-size: 12px; color: var(--slate); }
+    .section-body { padding: 24px 28px; }
+
+    /* ── STEP ── */
+    .step {
+      display: flex; gap: 16px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--navy); color: white;
+      font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .step-content h3 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .step-content p  { font-size: 13px; color: #475569; margin-bottom: 6px; }
+    .step-content p:last-child { margin-bottom: 0; }
+
+    /* ── BADGES / CHIPS ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge.emerald { background: #d1fae5; color: #065f46; }
+    .badge.sky     { background: #e0f2fe; color: #075985; }
+    .badge.violet  { background: #ede9fe; color: #4c1d95; }
+    .badge.blue    { background: #dbeafe; color: #1e40af; }
+    .badge.amber   { background: #fef3c7; color: #92400e; }
+    .badge.red     { background: #fee2e2; color: #991b1b; }
+    .badge.orange  { background: #ffedd5; color: #9a3412; }
+    .badge.slate   { background: #f1f5f9; color: #475569; }
+
+    /* ── ROLE TABLE ── */
+    .role-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+    .role-table th {
+      background: var(--surface); font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; font-size: 10px; color: var(--slate);
+      padding: 8px 12px; text-align: left; border: 1px solid var(--line);
+    }
+    .role-table td { padding: 8px 12px; border: 1px solid var(--line); }
+    .role-table tr:nth-child(even) td { background: #fafafa; }
+    .check { color: var(--emerald); font-weight: 900; font-size: 14px; }
+    .dash  { color: #cbd5e1; }
+
+    /* ── LIFECYCLE FLOW ── */
+    .lifecycle {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 6px; margin: 12px 0;
+    }
+    .lifecycle-arrow { color: #94a3b8; font-size: 16px; font-weight: 300; }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border-radius: 12px; padding: 14px 16px;
+      font-size: 13px; font-weight: 600; margin: 12px 0;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .callout.info    { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .callout.warn    { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .callout.tip     { background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; }
+    .callout.danger  { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .callout-icon    { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── URL PATH ── */
+    .url {
+      background: #1e293b; color: #7dd3fc;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px; font-weight: 600;
+      padding: 3px 10px; border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* ── CREDENTIAL TABLE ── */
+    .cred-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+    .cred-table th {
+      background: var(--navy); color: white; font-weight: 700;
+      font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      padding: 8px 12px; text-align: left;
+    }
+    .cred-table td { padding: 9px 12px; border-bottom: 1px solid var(--line); }
+    .cred-table tr:last-child td { border-bottom: none; }
+    .cred-table tr:hover td { background: #f8fafc; }
+    .mono { font-family: 'Consolas', monospace; font-size: 11px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow {
+      display: flex; align-items: center; gap: 0;
+      flex-wrap: nowrap; overflow-x: auto;
+      padding: 16px 0; margin: 12px 0;
+      scrollbar-width: thin;
+    }
+    .flow-step {
+      display: flex; flex-direction: column; align-items: center;
+      min-width: 100px; text-align: center;
+    }
+    .flow-box {
+      border-radius: 12px; padding: 10px 14px;
+      font-size: 11px; font-weight: 700;
+      border: 2px solid; min-width: 90px;
+      text-align: center;
+    }
+    .flow-label { font-size: 10px; color: var(--slate); margin-top: 5px; font-weight: 600; }
+    .flow-arrow { font-size: 18px; color: #94a3b8; padding: 0 4px; flex-shrink: 0; }
+
+    /* ── CHECKLIST ── */
+    .checklist { list-style: none; margin: 8px 0; }
+    .checklist li {
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 0; font-size: 13px; color: #475569;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .checklist li:last-child { border-bottom: none; }
+    .checklist li::before {
+      content: '☐';
+      font-size: 15px; color: #94a3b8;
+      flex-shrink: 0; margin-top: -1px;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: white; font-size: 12px; }
+      .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 40px 30px; }
+      .section { box-shadow: none; page-break-inside: avoid; }
+      .toc { page-break-after: always; }
+    }
+
+    @media (max-width: 600px) {
+      .cover { padding: 40px 20px; }
+      .cover h1 { font-size: 28px; }
+      .section-body { padding: 16px 20px; }
+      .section-header { padding: 16px 20px; }
+      .container { padding: 24px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     COVER
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">
+    <div class="cover-logo-icon">📦</div>
+    <div>
+      <span class="cover-logo-text">PalletTrack Pro</span>
+      <span class="cover-logo-sub">Water Company · Returnable Pallet System</span>
+    </div>
+  </div>
+  <h1>Pilot Training <span>Guide</span></h1>
+  <p class="lead">Complete step-by-step walkthrough for trainers and staff. Covers every role, every screen, and the full pallet lifecycle from factory to customer and back.</p>
+  <div class="cover-meta">
+    <span>📅 Version 1.3 — August 2026</span>
+    <span>👥 All Roles Covered</span>
+    <span>🔒 Confidential — Internal Use</span>
+    <span>🌐 Works Offline (Open in Browser)</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     TABLE OF CONTENTS
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="toc">
+  <h2>📋 Table of Contents</h2>
+  <div class="toc-grid">
+    <a href="#s1"><span class="toc-num">1</span> System Overview</a>
+    <a href="#s2"><span class="toc-num">2</span> Login &amp; User Roles</a>
+    <a href="#s3"><span class="toc-num">3</span> Pallet Lifecycle</a>
+    <a href="#s4"><span class="toc-num">4</span> Factory: Register Pallets</a>
+    <a href="#s5"><span class="toc-num">5</span> Warehouse: Load &amp; Scan</a>
+    <a href="#s6"><span class="toc-num">6</span> Dispatcher: Send Pallets</a>
+    <a href="#s7"><span class="toc-num">7</span> Driver: Deliver &amp; Return</a>
+    <a href="#s8"><span class="toc-num">8</span> Receiver: Confirm Delivery</a>
+    <a href="#s9"><span class="toc-num">9</span> Return Flow</a>
+    <a href="#s10"><span class="toc-num">10</span> Damaged &amp; Repair</a>
+    <a href="#s11"><span class="toc-num">11</span> Dashboard &amp; Reports</a>
+    <a href="#s12"><span class="toc-num">12</span> Command Center</a>
+    <a href="#s13"><span class="toc-num">13</span> Fleet Management</a>
+    <a href="#s14"><span class="toc-num">14</span> User Management</a>
+    <a href="#s15"><span class="toc-num">15</span> System Settings</a>
+    <a href="#s16"><span class="toc-num">16</span> Training Reset</a>
+    <a href="#s17"><span class="toc-num">17</span> Full Test Checklist</a>
+    <a href="#s18"><span class="toc-num">18</span> Batch Scanning (Trips)</a>
+    <a href="#s19"><span class="toc-num">19</span> Role Flexibility (Multi-Role Users)</a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 1 — SYSTEM OVERVIEW
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s1">
+  <div class="section-header">
+    <div class="section-icon" style="background:#eff6ff">🏭</div>
+    <div>
+      <h2>1. System Overview</h2>
+      <p>What PalletTrack Pro does and how it fits into daily operations</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <p style="color:#475569; margin-bottom:16px;">PalletTrack Pro is a real-time web application that tracks returnable pallets through the entire water delivery cycle. Every pallet has a unique QR code. Staff scan the code at each handoff point — the system records who did what, when, and where.</p>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <span><strong>Key principle:</strong> Every status change (load, dispatch, deliver, return) must be done through a QR scan on the Scan page. This is how the system knows where every pallet is at any moment.</span>
+    </div>
+
+    <h3 style="margin: 16px 0 8px; color: var(--navy); font-size: 14px;">What the system tracks:</h3>
+    <ul style="list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <li style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:13px;">📦 <strong>Pallet identity</strong> — number, QR, material, dimensions</li>
+      <li style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:13px;">🔄 <strong>Full movement history</strong> — every scan logged with user + timestamp</li>
+      <li style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:13px;">🚛 <strong>Fleet assignment</strong> — which truck and driver carried each pallet</li>
+      <li style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:13px;">⚠️ <strong>Damage tracking</strong> — damage records + repair status</li>
+      <li style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:13px;">📊 <strong>Reports &amp; audit</strong> — full history exportable by date/status</li>
+      <li style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px 14px; font-size:13px;">🔔 <strong>Notifications</strong> — alerts for damaged, lost, overdue pallets</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 2 — LOGIN & ROLES
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s2">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f5f3ff">🔐</div>
+    <div>
+      <h2>2. Login &amp; User Roles</h2>
+      <p>Each staff member has a role that controls what they can see and do</p>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="callout tip">
+      <span class="callout-icon">✅</span>
+      <span><strong>Default login URL:</strong> Open the browser and go to <span class="url">http://localhost:3001/login</span> (or the server IP provided). Every user logs in with their email and password.</span>
+    </div>
+
+    <h3 style="margin: 16px 0 8px; color: var(--navy); font-size: 14px;">Demo Accounts (Seed Credentials)</h3>
+    <table class="cred-table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Email</th>
+          <th>Password</th>
+          <th>Can Do</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge violet">Administrator</span></td>
+          <td><span class="mono">admin@pallettrack.local</span></td>
+          <td><span class="mono">password123</span></td>
+          <td>Everything — full system access</td>
+        </tr>
+        <tr>
+          <td><span class="badge blue">Manager</span></td>
+          <td><span class="mono">manager@pallettrack.local</span></td>
+          <td><span class="mono">password123</span></td>
+          <td>Dashboard, Command Center, Reports, Settings (no user management)</td>
+        </tr>
+        <tr>
+          <td><span class="badge emerald">Manufacturing</span></td>
+          <td><span class="mono">manufacturing@pallettrack.local</span></td>
+          <td><span class="mono">password123</span></td>
+          <td>Register pallets, print QR labels</td>
+        </tr>
+        <tr>
+          <td><span class="badge sky">Warehouse Loader</span></td>
+          <td><span class="mono">loader@pallettrack.local</span></td>
+          <td><span class="mono">password123</span></td>
+          <td>Scan page — load pallets onto trucks</td>
+        </tr>
+        <tr>
+          <td><span class="badge amber">Dispatcher</span></td>
+          <td><span class="mono">dispatcher@pallettrack.local</span></td>
+          <td><span class="mono">password123</span></td>
+          <td>Scan page — dispatch loaded pallets, manage fleet</td>
+        </tr>
+        <tr>
+          <td><span class="badge blue">Delivery Receiver</span></td>
+          <td><span class="mono">receiver@pallettrack.local</span></td>
+          <td><span class="mono">password123</span></td>
+          <td>Scan page — confirm delivery at customer site</td>
+        </tr>
+        <tr>
+          <td><span class="badge orange">Return Collector</span></td>
+          <td><span class="mono">collector@pallettrack.local</span></td>
+          <td><span class="mono">password123</span></td>
+          <td>Scan page — pick up returned pallets</td>
+        </tr>
+        <tr>
+          <td><span class="badge slate">Factory Receiver</span></td>
+          <td><span class="mono">factory@pallettrack.local</span></td>
+          <td><span class="mono">password123</span></td>
+          <td>Scan page — receive pallets back at factory</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn" style="margin-top:16px;">
+      <span class="callout-icon">⚠️</span>
+      <span>Each role sees only the menu items and actions they are authorized for. A Delivery Receiver cannot register pallets. A Manufacturing user cannot dispatch pallets. This is enforced automatically by the system.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 3 — LIFECYCLE
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s3">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f0fdf4">🔄</div>
+    <div>
+      <h2>3. Full Pallet Lifecycle</h2>
+      <p>The journey every pallet takes from factory to customer and back</p>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-box" style="background:#d1fae5; border-color:#6ee7b7; color:#065f46;">Available</div>
+        <div class="flow-label">Factory registered</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#e0f2fe; border-color:#7dd3fc; color:#075985;">Loaded</div>
+        <div class="flow-label">Scanned onto truck</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#ede9fe; border-color:#c4b5fd; color:#4c1d95;">In Transit</div>
+        <div class="flow-label">Dispatched by admin</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#dbeafe; border-color:#93c5fd; color:#1e40af;">Delivered</div>
+        <div class="flow-label">Receiver confirms</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#fef3c7; border-color:#fcd34d; color:#92400e;">Returning</div>
+        <div class="flow-label">Return truck picks up</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-step">
+        <div class="flow-box" style="background:#d1fae5; border-color:#6ee7b7; color:#065f46;">Available</div>
+        <div class="flow-label">Factory receives back</div>
+      </div>
+    </div>
+
+    <div class="callout info" style="margin-top: 4px;">
+      <span class="callout-icon">ℹ️</span>
+      <span><strong>Side paths:</strong> At any point a pallet can be marked <span class="badge red">Damaged</span> → goes to <span class="badge orange">Under Repair</span> → then back to <span class="badge emerald">Available</span>. Or permanently <span class="badge slate">Retired</span> / <span class="badge red">Lost</span>.</span>
+    </div>
+
+    <div class="callout tip" style="margin-top: 4px;">
+      <span class="callout-icon">🧮</span>
+      <span><strong>Accurate trip counting:</strong> a pallet's trip count increases <strong>only once</strong> — when the factory receives it back in <strong>Good</strong> condition. Marking it damaged, repairing it, or retiring it never adds a trip. Damage records are created automatically and resolved when the repair is completed.</span>
+    </div>
+
+    <table class="role-table" style="margin-top:16px;">
+      <thead>
+        <tr>
+          <th>Action (Scan)</th>
+          <th>Status Change</th>
+          <th>Who Does It</th>
+          <th>Where</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Register</strong></td><td>— → Available</td><td>Manufacturing</td><td>Register Pallet page</td></tr>
+        <tr><td><strong>Load</strong></td><td>Available → Loaded</td><td>Warehouse Loader</td><td>Scan page</td></tr>
+        <tr><td><strong>Dispatch</strong></td><td>Loaded → In Transit</td><td>Dispatcher / Admin</td><td>Scan page</td></tr>
+        <tr><td><strong>Deliver</strong></td><td>In Transit → Delivered</td><td>Delivery Receiver</td><td>Scan page (at customer)</td></tr>
+        <tr><td><strong>Return Pickup</strong></td><td>Delivered → Returning</td><td>Return Collector</td><td>Scan page</td></tr>
+        <tr><td><strong>Receive at Factory</strong></td><td>Returning → Available</td><td>Factory Receiver</td><td>Scan page</td></tr>
+        <tr><td><strong>Mark Damaged</strong></td><td>Any → Damaged</td><td>Any scanner role</td><td>Scan page</td></tr>
+        <tr><td><strong>Begin Repair</strong></td><td>Damaged → Under Repair</td><td>Admin / Manager</td><td>Pallet Profile</td></tr>
+        <tr><td><strong>Complete Repair</strong></td><td>Under Repair → Available</td><td>Admin / Manager</td><td>Pallet Profile</td></tr>
+        <tr><td><strong>Retire</strong></td><td>Any → Retired</td><td>Administrator</td><td>Pallet Profile</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 4 — FACTORY: REGISTER
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s4">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f0fdf4">🏭</div>
+    <div>
+      <h2>4. Factory: Registering New Pallets</h2>
+      <p>How the manufacturing team adds new pallets into the system</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="callout tip">
+      <span class="callout-icon">👤</span>
+      <span>Log in as <strong>Manufacturing</strong> — <span class="mono">manufacturing@pallettrack.local</span> / <span class="mono">password123</span></span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Go to the Pallets page</h3>
+        <p>In the left sidebar, click <strong>Pallets</strong>. You will see the pallets list with filter chips at the top.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Click "Register Pallet"</h3>
+        <p>Click the green <strong>+ Register Pallet</strong> button in the top right. A modal will open.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Fill in the pallet details</h3>
+        <p><strong>Pallet Number:</strong> Leave blank for auto-generation (recommended) or type a custom code like <span class="mono">PLT-001</span>.</p>
+        <p><strong>Manufacture Date:</strong> Select today's date.</p>
+        <p><strong>Material Type:</strong> Choose from the dropdown (plastic, wood, metal, etc.).</p>
+        <p><strong>Dimensions:</strong> e.g. <span class="mono">1200×800×150mm</span></p>
+        <p><strong>Weight Capacity:</strong> e.g. <span class="mono">500</span> kg</p>
+        <p><strong>Quantity:</strong> Use the +/− buttons or preset (1, 5, 10, 25) to register multiple at once.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Click "Generate QR Code"</h3>
+        <p>The pallet(s) are created with status <span class="badge emerald">Available</span> and the timeline records "Registered at factory".</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h3>Print the QR Label</h3>
+        <p>On the Pallets page, find your new pallet and click the <strong>🖨️ Print</strong> button. The label shows the QR code, pallet number, material type, and company branding. Print and attach to the physical pallet.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h3>Alternatively: Use Register Pallet page</h3>
+        <p>The sidebar also has a <strong>Register Pallet</strong> menu item (for manufacturing + admin only) which opens a dedicated full-page registration form with a live QR preview.</p>
+      </div>
+    </div>
+
+    <div class="callout info" style="margin-top:8px;">
+      <span class="callout-icon">ℹ️</span>
+      <span>After registering, the pallet appears on the <strong>Dispatch page → Step 1 (Available — Scan to Load)</strong>. It stays there until a Warehouse Loader scans it to mark it as Loaded.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 5 — WAREHOUSE: LOAD
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s5">
+  <div class="section-header">
+    <div class="section-icon" style="background:#e0f2fe">📦</div>
+    <div>
+      <h2>5. Warehouse: Loading Pallets onto a Truck</h2>
+      <p>The loader scans pallets to mark them as loaded and ready for dispatch</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="callout tip">
+      <span class="callout-icon">👤</span>
+      <span>Log in as <strong>Warehouse Loader</strong> — <span class="mono">loader@pallettrack.local</span> / <span class="mono">password123</span></span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Go to the Scan page</h3>
+        <p>Click <strong>Scan</strong> in the sidebar. You will see the QR scanner view.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Scan the pallet QR code</h3>
+        <p>Point the camera at the pallet's QR label. Or switch to <strong>Manual</strong> mode and type the pallet number (e.g. <span class="mono">PT-MS24JRRVQ46N</span>). The system will look it up and show the pallet details.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Select "Load" action</h3>
+        <p>A panel appears showing the pallet's current status (<span class="badge emerald">Available</span>) and the available actions. Click <strong>Load onto truck</strong>.</p>
+        <p>Optionally fill: products loaded, notes.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Submit</h3>
+        <p>Click <strong>Confirm Action</strong>. Status changes to <span class="badge sky">Loaded</span>. The pallet now appears in the Dispatch page → Step 2 (Ready to Dispatch).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 6 — DISPATCHER
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s6">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ede9fe">🚛</div>
+    <div>
+      <h2>6. Dispatcher: Sending Pallets Out</h2>
+      <p>The dispatcher assigns the truck and driver and marks the pallet as in-transit</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="callout tip">
+      <span class="callout-icon">👤</span>
+      <span>Log in as <strong>Dispatcher</strong> — <span class="mono">dispatcher@pallettrack.local</span> / <span class="mono">password123</span></span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Go to Dispatch page (optional view)</h3>
+        <p>Click <strong>Dispatch</strong> in sidebar. The <strong>Dispatch Pipeline</strong> tab shows two sections: pallets that still need loading (Step 1) and pallets ready to dispatch (Step 2). This is read-only — actual dispatch is done via scanning.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Go to Scan page and scan the loaded pallet</h3>
+        <p>Scan the pallet QR code. The system detects its status is <span class="badge sky">Loaded</span> and shows the available next action: <strong>Dispatch</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Fill dispatch details</h3>
+        <p><strong>Truck Number:</strong> Select from the fleet dropdown (pre-registered trucks). Selecting a registered truck links the dispatch to that fleet record.</p>
+        <p><strong>Driver Name:</strong> Select from the driver dropdown. Selecting a registered driver links the dispatch to their fleet record — used by the Driver Performance Report and fleet history.</p>
+        <p><strong>Destination:</strong> Type the customer/delivery site name.</p>
+        <p><strong>Expected Delivery:</strong> Select the expected delivery date.</p>
+        <p><strong>Notes:</strong> Optional instructions.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Submit</h3>
+        <p>Click <strong>Confirm Action</strong>. Status changes to <span class="badge violet">In Transit</span>. The pallet moves to the "In Transit" tab in the Dispatch page showing truck and driver info.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 7 — DRIVER / DELIVERY
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s7">
+  <div class="section-header">
+    <div class="section-icon" style="background:#dbeafe">🗺️</div>
+    <div>
+      <h2>7. Delivery Receiver: Confirming Delivery</h2>
+      <p>The receiver at the customer site scans the pallet to confirm it arrived</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="callout tip">
+      <span class="callout-icon">👤</span>
+      <span>Log in as <strong>Delivery Receiver</strong> — <span class="mono">receiver@pallettrack.local</span> / <span class="mono">password123</span></span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Open the Scan page (works on mobile)</h3>
+        <p>The receiver can use any phone or tablet connected to the company network. Open the app, log in, go to <strong>Scan</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Scan the pallet QR code</h3>
+        <p>Point the camera at the pallet label. The system shows pallet details and status <span class="badge violet">In Transit</span>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Select "Deliver" and fill receiver info</h3>
+        <p><strong>Receiver Name:</strong> Name of the person accepting the pallet at the customer site.</p>
+        <p><strong>Receiver Contact:</strong> Phone number or ID.</p>
+        <p><strong>Condition:</strong> Note any visible condition issues.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Submit</h3>
+        <p>Status changes to <span class="badge blue">Delivered</span>. The pallet is now at the customer site. The system records who confirmed delivery and when.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 8 — RETURN FLOW
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s8" style="border: none">
+</div>
+
+<div class="section" id="s9">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fef3c7">↩️</div>
+    <div>
+      <h2>9. Return Flow: Getting Pallets Back</h2>
+      <p>Two-step return: collector picks up from customer, factory receiver signs them in</p>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <h3 style="margin-bottom:12px; color:var(--navy); font-size:14px;">Step A — Return Collector picks up from customer site</h3>
+    <div class="callout tip">
+      <span class="callout-icon">👤</span>
+      <span>Log in as <strong>Return Collector</strong> — <span class="mono">collector@pallettrack.local</span> / <span class="mono">password123</span></span>
+    </div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Scan pallet at customer location</h3>
+        <p>The pallet is <span class="badge blue">Delivered</span>. Select <strong>Return Pickup</strong>. The <strong>Collector</strong> field is auto-filled with your logged-in user name (editable) — fill it only if a different person is physically collecting. Choose the condition and submit → status becomes <span class="badge amber">Returning</span>.</p>
+        <p><strong>Damaged at pickup?</strong> Choose <strong>Damaged</strong> under condition and describe it in the notes — the system records the pickup <em>and</em> logs a damage report automatically, so the damage is on record before the pallet reaches the factory.</p>
+      </div>
+    </div>
+
+    <h3 style="margin: 20px 0 12px; color:var(--navy); font-size:14px;">Step B — Factory Receiver signs pallet back in</h3>
+    <div class="callout tip">
+      <span class="callout-icon">👤</span>
+      <span>Log in as <strong>Factory Receiver</strong> — <span class="mono">factory@pallettrack.local</span> / <span class="mono">password123</span></span>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Scan pallet at factory gate</h3>
+        <p>Pallet is <span class="badge amber">Returning</span>. Select <strong>Receive at Factory</strong>. The <strong>Inspector</strong> field is auto-filled with your logged-in user name (editable). Fill the condition checklist. Submit → status returns to <span class="badge emerald">Available</span>. Trip count increments by 1.</p>
+      </div>
+    </div>
+
+    <div class="callout info" style="margin-top:8px;">
+      <span class="callout-icon">ℹ️</span>
+      <span>The pallet is now available for the next delivery cycle. Check the pallet profile to see the full trip history.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 10 — DAMAGED & REPAIR
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s10">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fef2f2">🔧</div>
+    <div>
+      <h2>10. Damaged &amp; Repair Workflow</h2>
+      <p>What to do when a pallet is broken or needs inspection</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Mark as Damaged (Scan page)</h3>
+        <p>Any role with scan access can mark a pallet damaged. Scan the pallet → select <strong>Mark Damaged</strong> → describe the damage → submit. Status becomes <span class="badge red">Damaged</span>. A <strong>damage record</strong> is created automatically (visible in the Damaged Pallet Report) and a notification is sent to all admins and managers.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Begin Repair (Pallet Profile page)</h3>
+        <p>Admin or Manager opens the pallet profile (from Pallets list). Click <strong>Begin Repair</strong> action. Status becomes <span class="badge orange">Under Repair</span>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Complete Repair</h3>
+        <p>When the physical pallet is fixed, click <strong>Complete Repair</strong> on the profile. Status returns to <span class="badge emerald">Available</span> and the pallet re-enters the normal cycle. All open damage reports for the pallet are marked <strong>Resolved</strong> automatically, and completing a repair does <strong>not</strong> count as a completed trip.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Retire a pallet permanently</h3>
+        <p>If a pallet is beyond repair, an Administrator can click <strong>Retire</strong>. Status becomes <span class="badge slate">Retired</span> and the pallet is removed from active counts but kept in audit history.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 11 — DASHBOARD
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s11">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f0fdf4">📊</div>
+    <div>
+      <h2>11. Dashboard &amp; Reports</h2>
+      <p>Real-time KPIs, pipeline view, and downloadable reports</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <p style="color:#475569; margin-bottom:12px;">Available to: <span class="badge violet">Administrator</span> <span class="badge blue">Manager</span></p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Dashboard KPI tiles</h3>
+        <p>Click any coloured card (Available, In Transit, Returning, Damaged) to jump directly to the Pallets page with that filter <strong>already selected</strong>. No need to manually pick the chip.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Pipeline bar chart</h3>
+        <p>Shows the proportion of pallets in each stage at a glance.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Reports page</h3>
+        <p>Go to <strong>Reports</strong> in the sidebar. Filter by date range and status. The audit trail on the right side shows every action taken by every user with timestamps — useful for accountability.</p>
+        <p><strong>Driver Performance Report:</strong> shows each fleet driver with <strong>dispatches</strong> vs <strong>completed deliveries</strong> — a dispatch only counts as a delivery once the pallet is confirmed delivered — plus their phone number from the fleet record.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Audit Log page</h3>
+        <p>Full system-wide activity log: who logged in, who registered pallets, every status change. Accessible by Admin and Manager.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 12 — COMMAND CENTER
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s12">
+  <div class="section-header">
+    <div class="section-icon" style="background:#eff6ff">🎛️</div>
+    <div>
+      <h2>12. Command Center</h2>
+      <p>Live operations hub — real-time pallet counts, activity feed, alerts, and quick lookup</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <p style="color:#475569; margin-bottom:12px;">Available to: <span class="badge violet">Administrator</span> <span class="badge blue">Manager</span></p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Pipeline counters (top section)</h3>
+        <p>Shows live count for every status — Available, Loaded, In Transit, Delivered, Returning. Updates every 30 seconds automatically. You can also click the refresh button.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Pallet Lookup — Type or Scan</h3>
+        <p>Toggle between <strong>Type</strong> (enter pallet number) and <strong>Scan QR</strong> (use camera). Once found, a full details card shows status, material, dimensions, trip count, location, and a direct link to the pallet profile — without any extra clicks.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Live Activity Feed</h3>
+        <p>Shows every scan action across the system in real time with who did it and when. The sparkline chart shows scan frequency over the past 24 hours.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Alerts panel</h3>
+        <p>Lists pallets that are overdue (return date passed), damaged, or lost. Click any row to open that pallet's profile immediately.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 13 — FLEET MANAGEMENT
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s13">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ede9fe">🚛</div>
+    <div>
+      <h2>13. Fleet Management</h2>
+      <p>Register trucks and drivers, and assign drivers to trucks</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <p style="color:#475569; margin-bottom:12px;">Available to: <span class="badge violet">Administrator</span> <span class="badge blue">Manager</span> <span class="badge amber">Dispatcher</span></p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Add a Truck</h3>
+        <p>Go to <strong>Fleet</strong> → <strong>Trucks</strong> tab → click <strong>Add Truck</strong>. Enter the plate number, vehicle model, capacity (number of pallets), and optional notes. Click Save.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Add a Driver</h3>
+        <p>Switch to the <strong>Drivers</strong> tab → click <strong>Add Driver</strong>. Enter name, phone number, and license number. Click Save.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Assign a Driver to a Truck</h3>
+        <p>In the Trucks table, click the 🔗 <strong>Assign</strong> icon next to any truck. A modal appears — select the driver from the dropdown. Click <strong>Assign Driver</strong>. The truck card now shows the driver's name and phone.</p>
+        <p>This assignment is a linked database relation — a truck can only be assigned a driver that exists in the Drivers list, so fleet records stay consistent. The assignment carries over to Dispatch — the dispatcher sees which driver is default for each truck.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Deactivate a Truck or Driver</h3>
+        <p>Click the power icon (⏻) next to a truck or driver to deactivate. Inactive vehicles/drivers do not appear in the dispatch dropdown. Reactivate at any time.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 14 — USER MANAGEMENT
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s14">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f0fdf4">👥</div>
+    <div>
+      <h2>14. User Management</h2>
+      <p>Add, edit, and manage staff accounts</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <p style="color:#475569; margin-bottom:12px;">Available to: <span class="badge violet">Administrator only</span></p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>View all users</h3>
+        <p>Go to <strong>Users</strong> in the sidebar. Users are grouped by role. Use the search bar to find a specific person.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Add a new user</h3>
+        <p>Click <strong>+ Add User</strong>. Fill in name, email, role, and password. Click Save. The user can now log in with those credentials.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Edit a user</h3>
+        <p>Click the ✏️ Edit button next to any user. You can change name, role, and reset their password. Click Save.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Deactivate a user</h3>
+        <p>Click the ⏻ Deactivate button. The user is immediately locked out. They cannot log in until reactivated. You cannot deactivate yourself.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 15 — SETTINGS
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s15">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f8fafc">⚙️</div>
+    <div>
+      <h2>15. System Settings</h2>
+      <p>Configure operational thresholds, label branding, and material types</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <p style="color:#475569; margin-bottom:12px;">Available to: <span class="badge violet">Administrator</span> <span class="badge blue">Manager</span></p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Return Window (days)</h3>
+        <p>The number of days a pallet can be out before it is flagged as overdue. Default is 14 days. Change this to match the company's SLA with customers.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Low Inventory Threshold</h3>
+        <p>When the count of Available pallets drops below this number, the Dashboard will highlight it. Default is 50.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Material Types</h3>
+        <p>Add or remove pallet material types that appear in the Register Pallet dropdown. Click <strong>+</strong> to add a new type (e.g. "fiberglass"). The new type appears immediately when registering pallets. The system auto-saves when you add a type.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Label &amp; Branding</h3>
+        <p>Change the company name, tagline, accent colour, and footer text that prints on pallet QR labels. A live preview shows how the label will look before saving.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 16 — TRAINING RESET
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s16">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fef2f2">🔄</div>
+    <div>
+      <h2>16. Training Reset — Clean Up Test Data</h2>
+      <p>How to reset the system between training sessions without losing users or settings</p>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="callout danger">
+      <span class="callout-icon">🚨</span>
+      <span><strong>Admin only.</strong> These actions permanently delete data. Only use during training/testing — never on a live production database that contains real operational data.</span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Go to Settings → Database &amp; Testing section</h3>
+        <p>Scroll to the bottom of the Settings page. You will see three action cards.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Option A: Seed Demo Pallets</h3>
+        <p>Click <strong>Seed Demo Data</strong>. A confirmation dialog appears — type <span class="mono">SEED</span> and click Confirm. Creates 10 pallets across all statuses so trainees see a realistic system without manually going through every step first.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Option B: Clear All Pallet Data</h3>
+        <p>Click <strong>Clear Pallets</strong>. Type <span class="mono">DELETE</span> in the confirmation dialog and click Confirm. Removes all pallets, movements, and damage records. Users and settings are preserved. Use this to start a fresh training session.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Option C: Clear Audit Log</h3>
+        <p>Type <span class="mono">CLEAR</span> to wipe audit trail entries. Useful if you want the audit log to only show activity from the current training session.</p>
+      </div>
+    </div>
+
+    <div class="callout tip" style="margin-top:8px;">
+      <span class="callout-icon">💡</span>
+      <span><strong>Recommended training session flow:</strong> (1) Clear pallets → (2) Optionally seed demo data → (3) Walk through each role's workflow with trainees → (4) Clear pallets again to reset for next group.</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 17 — FULL TEST CHECKLIST
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s17">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f0fdf4">✅</div>
+    <div>
+      <h2>17. Full System Test Checklist</h2>
+      <p>Use this to verify every feature works end-to-end. Hand to the trainer to check off during the pilot session.</p>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin-bottom:8px;">🔐 Authentication</h3>
+    <ul class="checklist">
+      <li>Can log in with each demo account</li>
+      <li>Unauthorized pages redirect to /unauthorized</li>
+      <li>Wrong password shows error</li>
+      <li>Sign Out button works correctly</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">🏭 Registration &amp; QR</h3>
+    <ul class="checklist">
+      <li>Manufacturing can register a single pallet</li>
+      <li>Manufacturing can register 5 pallets at once (batch)</li>
+      <li>Auto-generated pallet number starts with PT-</li>
+      <li>Custom pallet number is accepted</li>
+      <li>Material type dropdown shows custom types added in Settings</li>
+      <li>New pallet appears in Pallets list with status "Available"</li>
+      <li>New pallet shows "Registered at factory" as first timeline entry</li>
+      <li>QR label prints correctly with company name and pallet number</li>
+      <li>New pallet appears in Dispatch → Step 1 (Available)</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">📱 Scan Page Workflow</h3>
+    <ul class="checklist">
+      <li>Camera scanner initializes and scans a QR code</li>
+      <li>Manual entry by pallet number works</li>
+      <li>Scan page shows pallet details and allowed next actions</li>
+      <li>Loader can load a pallet (Available → Loaded)</li>
+      <li>Dispatcher can dispatch a loaded pallet (Loaded → In Transit)</li>
+      <li>Dispatch form shows truck and driver dropdowns from Fleet</li>
+      <li>Receiver can deliver pallet (In Transit → Delivered)</li>
+      <li>Collector can pick up returned pallet (Delivered → Returning)</li>
+      <li>Factory receiver can receive pallet (Returning → Available)</li>
+      <li>Any scanner can mark pallet damaged</li>
+      <li>Trip count increments after each full cycle</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">🚛 Dispatch Page</h3>
+    <ul class="checklist">
+      <li>Dispatch Pipeline tab shows Available pallets in Step 1</li>
+      <li>Dispatch Pipeline tab shows Loaded pallets in Step 2</li>
+      <li>In Transit tab shows dispatched pallets with truck and driver info</li>
+      <li>Fleet Status tab shows trucks with assigned drivers</li>
+      <li>Overdue counter highlights red when return date passed</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">🎛️ Command Center</h3>
+    <ul class="checklist">
+      <li>Pipeline counts match Pallets page counts</li>
+      <li>Pallet lookup by typing finds correct pallet</li>
+      <li>Pallet lookup by QR scan opens pallet details card</li>
+      <li>Result card shows status, material, location, trips in one view</li>
+      <li>"Open Profile" button goes to pallet profile page</li>
+      <li>Activity feed updates after scanning</li>
+      <li>Alerts section shows damaged/lost/overdue pallets</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">🚛 Fleet Management</h3>
+    <ul class="checklist">
+      <li>Can add a truck with plate number and model</li>
+      <li>Can add a driver with name and phone</li>
+      <li>Can assign a driver to a truck (link icon)</li>
+      <li>Assigned driver name shows in truck table row</li>
+      <li>Truck and driver appear in scan page dispatch dropdowns</li>
+      <li>Deactivating a truck removes it from dispatch dropdowns</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">📊 Dashboard</h3>
+    <ul class="checklist">
+      <li>KPI cards show correct counts matching real data</li>
+      <li>Clicking "In Transit" card opens Pallets page with In Transit filter selected</li>
+      <li>Clicking "Available" card opens Pallets page with Available filter selected</li>
+      <li>Clicking "Damaged" card opens Pallets page with Damaged filter selected</li>
+      <li>Recent events feed shows recent scans</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">⚙️ Settings</h3>
+    <ul class="checklist">
+      <li>Return window change saves and shows in settings</li>
+      <li>Low inventory threshold saves and shows in settings</li>
+      <li>Adding new material type auto-saves and appears in Register Pallet dropdown immediately</li>
+      <li>Label branding changes reflect in QR label preview</li>
+      <li>Seed Demo Pallets creates pallets in various statuses</li>
+      <li>Clear Pallets removes all pallet data (users/settings preserved)</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">👥 User Management</h3>
+    <ul class="checklist">
+      <li>Admin can add a new user with any role</li>
+      <li>New user can log in immediately</li>
+      <li>Admin can edit user name and role</li>
+      <li>Admin can reset a user's password</li>
+      <li>Deactivated user cannot log in</li>
+      <li>Admin cannot deactivate own account</li>
+    </ul>
+
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">📑 Batch Scanning (Trips)</h3>
+    <ul class="checklist">
+      <li>Batch Scan page opens with a list of trips and a New Trip button</li>
+      <li>Can create a Dispatch Trip with truck, driver and destination entered once</li>
+      <li>Return Collection Trip auto-fills the Collector from the logged-in user</li>
+      <li>Factory Receive Trip auto-fills the Inspector from the logged-in user</li>
+      <li>Multiple pallets scan onto the same trip without re-typing the header</li>
+      <li>Per-pallet condition prompt appears (Good / Damaged / Unknown)</li>
+      <li>Marking Damaged at collection or factory creates a damage record</li>
+      <li>Scanned / failed counters update after every scan</li>
+      <li>Complete Trip closes the trip and shows it under Recent completed trips</li>
+      <li>Driver Performance report shows the Trips column</li>
+      <li>Trip header (truck/driver/destination/collector/inspector) saved on every movement</li>
+    </ul>
+
+    <div class="callout tip" style="margin-top:20px;">
+      <span class="callout-icon">🏆</span>
+      <span><strong>All boxes checked?</strong> The system is fully operational and ready for live use. Hand over the production credentials to the client and switch off the training seed accounts (or change their passwords).</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 18 — BATCH SCANNING (TRIPS)
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s18">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ede9fe">📑</div>
+    <div>
+      <h2>18. Batch Scanning — Save Once, Scan Many</h2>
+      <p>Create one trip header, then scan multiple pallets onto it — no re-typing per pallet</p>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <span><strong>What batch scanning does:</strong> For <strong>Dispatch</strong>, <strong>Return Collection</strong> and <strong>Factory Receive</strong>, you now create a <strong>Trip</strong> first — entering the truck, driver and destination (or collector / inspector) <strong>once</strong> — and then scan as many pallets onto that trip as you like. The trip header is saved onto every pallet automatically.</span>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">👤</span>
+      <span>Available to: <span class="badge violet">Administrator</span> <span class="badge amber">Dispatcher</span> <span class="badge orange">Return Collector</span> <span class="badge slate">Factory Receiver</span> — <span class="badge blue">Manager</span> is view-only.</span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Open the Batch Scan page</h3>
+        <p>Click <strong>Batch Scan</strong> in the sidebar. You'll see a list of open trips and a <strong>+ New Trip</strong> button.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Choose the trip type</h3>
+        <p>Pick <strong>Dispatch Trip</strong>, <strong>Return Collection Trip</strong>, or <strong>Factory Receive Trip</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Fill the header once</h3>
+        <p><strong>Dispatch:</strong> select the <strong>Truck</strong> and <strong>Driver</strong> from the fleet dropdowns and type the <strong>Destination</strong>.</p>
+        <p><strong>Return Collection:</strong> the <strong>Collector</strong> name is auto-filled with your logged-in user — just verify it.</p>
+        <p><strong>Factory Receive:</strong> the <strong>Inspector</strong> name is auto-filled with your logged-in user — just verify it.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Start the trip</h3>
+        <p>Click <strong>Start Trip</strong>. The trip opens with the scanner, a live manifest, and a batch summary showing scanned / failed counts.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h3>Scan pallets one by one</h3>
+        <p>Scan the QR code (or type the number manually) for each pallet. On the return flows each one asks for a condition before adding:</p>
+        <p><strong>Return Collection:</strong> Good / Damaged / Unknown. Choosing <strong>Damaged</strong> lets you describe it — the system records the pickup and a damage report automatically.</p>
+        <p><strong>Factory Receive:</strong> Good / Damaged. Choosing <strong>Damaged</strong> sends the pallet to the <span class="badge red">Damaged</span> status and creates a damage record instead of returning it to Available.</p>
+        <p><strong>Dispatch:</strong> no condition prompt — just click <strong>Add to Trip</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h3>Watch the manifest update</h3>
+        <p>Every scanned pallet appears with its status change (e.g. Loaded → In Transit). The scanned counter in the header and summary updates instantly.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-content">
+        <h3>Complete the trip</h3>
+        <p>When all pallets for that load are scanned, click <strong>Complete Trip</strong>. The trip closes and appears under <strong>Recent completed trips</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">8</div>
+      <div class="step-content">
+        <h3>Check the Driver Performance Report</h3>
+        <p>The report now shows a <strong>Trips</strong> column per driver — how many dispatch trips they completed — alongside Dispatches and Deliveries.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 19 — ROLE FLEXIBILITY (MULTI-ROLE USERS)
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s19">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ecfeff">👥</div>
+    <div>
+      <h2>19. Role Flexibility — One User, Multiple Roles</h2>
+      <p>Grant a single account several roles (e.g. Dispatcher + Delivery Receiver) — the user can then perform all of those steps</p>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div>
+        <strong>Why this matters (client Q4)</strong><br />
+        In practice the same sales team member or truck driver often visits the same customer for a new
+        delivery <em>and</em> picks up returns. With role flexibility that one person can dispatch, confirm
+        delivery, and collect returns — without needing three separate accounts.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Open User Management (Administrator only)</h3>
+        <p>Go to <strong>Users</strong> in the side navigation. Only Administrators can manage users.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Add or edit a user and pick multiple roles</h3>
+        <p>Click <strong>Add user</strong> or the <strong>Edit</strong> button on a user row. The <strong>Roles (multi-select)</strong>
+        section lists all 8 roles as checkable chips — tick every role the person needs. Each user row also shows
+        badges for all of the user's roles (e.g. <em>Dispatcher · Delivery Receiver · Return Collector</em>).</p>
+        <p>The first checked role becomes the account's <em>primary</em> role (used for sorting and the post-login home page).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>What the combined user can now do</h3>
+        <p>Authorization is the <strong>union</strong> of every assigned role. A user with Dispatcher + Delivery
+        Receiver + Return Collector can, on the <strong>Scan</strong> page and <strong>Batch Scan</strong> page:</p>
+        <ul>
+          <li><strong>Dispatch</strong> loaded pallets onto a truck (Dispatcher)</li>
+          <li><strong>Confirm delivery</strong> at the customer (Delivery Receiver)</li>
+          <li><strong>Collect returns</strong> on the return visit (Return Collector)</li>
+          <li><strong>Receive pallets</strong> back at the factory (Factory Receiver, if assigned)</li>
+        </ul>
+        <p>The side navigation only shows sections that role set can access (e.g. admin-only Users / Settings stay hidden).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Good practice — keep it audited</h3>
+        <p>Every scan and action is still recorded in the <strong>Audit Log</strong> with the acting user's name and the
+        exact transition, so a combined-role user never works invisibly. Best practice: give combined roles only to
+        trusted team members, and keep Administrator / Manager assignments to a few people.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="text-align:center; padding:32px 0 0; color:#94a3b8; font-size:12px;">
+  <p>PalletTrack Pro · Pilot Training Guide v1.3 · Confidential &amp; Internal Use Only</p>
+  <p style="margin-top:4px;">Prepared for Water Company Client Training — July 2026</p>
+</div>
+
+</div><!-- /container -->
+</body>
+</html>
