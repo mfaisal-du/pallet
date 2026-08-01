@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PageReveal } from "@/components/motion/PageReveal";
 import { Badge } from "@/components/ui/Badge";
 import { ScannerView } from "@/components/ui/ScannerView";
-import { STATUS_LABELS, STATUS_COLORS } from "@/lib/pallet-machine";
+import { STATUS_COLORS } from "@/lib/pallet-machine";
+import { useStatusLabels } from "@/components/layout/StatusLabelsProvider";
 import Link from "next/link";
 import {
   Package, Truck, MapPin, RotateCcw, AlertTriangle,
@@ -41,18 +42,18 @@ type PalletResult = {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const STAGES = [
-  { key: "available",  label: "Available",  color: "text-emerald-700", bg: "bg-emerald-100", border: "border-emerald-200", icon: Package },
-  { key: "loaded",     label: "Loaded",     color: "text-sky-700",     bg: "bg-sky-100",     border: "border-sky-200",     icon: Package },
-  { key: "in_transit", label: "In Transit", color: "text-violet-700",  bg: "bg-violet-100",  border: "border-violet-200",  icon: Truck },
-  { key: "delivered",  label: "Delivered",  color: "text-blue-700",    bg: "bg-blue-100",    border: "border-blue-200",    icon: MapPin },
-  { key: "returning",  label: "Returning",  color: "text-amber-700",   bg: "bg-amber-100",   border: "border-amber-200",   icon: RotateCcw },
+  { key: "available",  color: "text-emerald-700", bg: "bg-emerald-100", border: "border-emerald-200", icon: Package },
+  { key: "loaded",     color: "text-sky-700",     bg: "bg-sky-100",     border: "border-sky-200",     icon: Package },
+  { key: "in_transit", color: "text-violet-700",  bg: "bg-violet-100",  border: "border-violet-200",  icon: Truck },
+  { key: "delivered",  color: "text-blue-700",    bg: "bg-blue-100",    border: "border-blue-200",    icon: MapPin },
+  { key: "returning",  color: "text-amber-700",   bg: "bg-amber-100",   border: "border-amber-200",   icon: RotateCcw },
 ];
 
 const OFFSTAGE = [
-  { key: "damaged",      label: "Damaged",      color: "text-red-600",    bg: "bg-red-50",     border: "border-red-200" },
-  { key: "under_repair", label: "Under Repair",  color: "text-orange-600", bg: "bg-orange-50",  border: "border-orange-200" },
-  { key: "retired",      label: "Retired",       color: "text-slate-600",  bg: "bg-slate-50",   border: "border-slate-200" },
-  { key: "lost",         label: "Lost",          color: "text-red-700",    bg: "bg-red-50",     border: "border-red-200" },
+  { key: "damaged",      color: "text-red-600",    bg: "bg-red-50",     border: "border-red-200" },
+  { key: "under_repair", color: "text-orange-600", bg: "bg-orange-50",  border: "border-orange-200" },
+  { key: "retired",      color: "text-slate-600",  bg: "bg-slate-50",   border: "border-slate-200" },
+  { key: "lost",         color: "text-red-700",    bg: "bg-red-50",     border: "border-red-200" },
 ];
 
 const ACTION_LABELS: Record<string, string> = {
@@ -105,6 +106,7 @@ function Sparkline({ buckets }: { buckets: HourBucket[] }) {
 // ─── Pallet Result Card ────────────────────────────────────────────────────────
 
 function PalletResultCard({ result }: { result: PalletResult }) {
+  const labels = useStatusLabels();
   const tone = (STATUS_COLORS[result.status as PalletStatus] ?? "neutral") as "ok" | "warn" | "neutral" | "danger";
   return (
     <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
@@ -116,7 +118,7 @@ function PalletResultCard({ result }: { result: PalletResult }) {
           <p className="text-xs text-muted">Pallet ID: {result.id.slice(0, 12)}…</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Badge tone={tone}>{STATUS_LABELS[result.status as PalletStatus] || result.status}</Badge>
+          <Badge tone={tone}>{labels[result.status as PalletStatus] || result.status}</Badge>
           <Link href={`/admin/pallets/${result.id}`}
             className="flex items-center gap-1.5 rounded-xl bg-navy-900 px-3 py-1.5 text-xs font-bold text-white hover:bg-navy-800 transition">
             Open Profile <ArrowRight size={11} />
@@ -154,6 +156,7 @@ function PalletResultCard({ result }: { result: PalletResult }) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export function CommandCenterClient() {
+  const labels = useStatusLabels();
   const [data, setData] = useState<CommandData | null>(null);
   const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(true);
@@ -250,7 +253,7 @@ export function CommandCenterClient() {
 
       {/* ── PIPELINE ── */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-        {STAGES.map(({ key, label, color, bg, border, icon: Icon }, idx) => {
+        {STAGES.map(({ key, color, bg, border, icon: Icon }, idx) => {
           const count = sm[key] ?? 0;
           return (
             <div key={key} className={`relative flex flex-col items-center rounded-2xl border ${border} ${bg} p-4 text-center`}>
@@ -261,7 +264,7 @@ export function CommandCenterClient() {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} key={`${key}-${count}`}>
                 {count}
               </motion.p>
-              <p className="mt-0.5 text-[10px] font-bold text-slate-500">{label}</p>
+              <p className="mt-0.5 text-[10px] font-bold text-slate-500">{labels[key as PalletStatus] || key}</p>
               {idx < STAGES.length - 1 && (
                 <ArrowRight size={11} className="absolute -right-2 top-1/2 -translate-y-1/2 text-slate-300 hidden md:block z-10" />
               )}
@@ -272,11 +275,11 @@ export function CommandCenterClient() {
 
       {/* Off-stage summary */}
       <div className="flex flex-wrap gap-2">
-        {OFFSTAGE.map(({ key, label, color, bg, border }) => {
+        {OFFSTAGE.map(({ key, color, bg, border }) => {
           const count = sm[key] ?? 0;
           return (
             <div key={key} className={`flex items-center gap-2 rounded-xl border ${border} ${bg} px-3 py-2`}>
-              <span className={`text-xs font-bold ${color}`}>{label}</span>
+              <span className={`text-xs font-bold ${color}`}>{labels[key as PalletStatus] || key}</span>
               <span className={`font-mono text-sm font-black ${count > 0 ? color : "text-slate-400"}`}>{count}</span>
             </div>
           );
@@ -418,7 +421,7 @@ export function CommandCenterClient() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-mono text-xs font-bold text-navy-900 truncate">{p.palletNumber}</p>
-                  <p className="text-[11px] text-orange-600 font-semibold capitalize">{STATUS_LABELS[p.status as PalletStatus] || p.status}</p>
+                  <p className="text-[11px] text-orange-600 font-semibold capitalize">{labels[p.status as PalletStatus] || p.status}</p>
                 </div>
                 <ArrowRight size={11} className="text-muted shrink-0" />
               </Link>

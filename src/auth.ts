@@ -5,6 +5,7 @@ import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { authConfig } from "@/auth.config";
+import { rolesOfUser } from "@/lib/roles";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -14,6 +15,7 @@ const credentialsSchema = z.object({
 declare module "next-auth" {
   interface User {
     role: Role;
+    roles: Role[];
   }
   interface Session {
     user: {
@@ -21,6 +23,7 @@ declare module "next-auth" {
       email: string;
       name: string;
       role: Role;
+      roles: Role[];
     };
   }
 }
@@ -29,6 +32,7 @@ declare module "@auth/core/jwt" {
   interface JWT {
     id?: string;
     role?: Role;
+    roles?: Role[];
   }
 }
 
@@ -53,11 +57,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const ok = await compare(parsed.data.password, user.passwordHash);
         if (!ok) return null;
 
+        // rolesOfUser falls back to [role] for legacy rows without a roles set
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          roles: rolesOfUser(user as { role: Role; roles?: unknown }),
         };
       },
     }),

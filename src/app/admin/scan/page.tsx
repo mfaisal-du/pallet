@@ -8,8 +8,8 @@ export default async function ScanPage() {
   if (!session?.user) redirect("/login");
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
-      <ScanPageClient userName={session.user.name} userRole={session.user.role} />
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
+      <ScanPageClient userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles} />
     </AdminShell>
   );
 }

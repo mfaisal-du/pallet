@@ -29,7 +29,7 @@ export default async function PalletLabelsPage() {
   ]);
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <PalletLabelsPrintClient
         initialPallets={pallets.map((p) => ({
           ...p,

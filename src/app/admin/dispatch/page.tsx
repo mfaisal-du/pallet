@@ -56,7 +56,7 @@ export default async function DispatchPage() {
   }
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <DispatchPageClient
         availablePallets={availablePallets.map(p => ({ ...p, createdAt: p.createdAt.toISOString() }))}
         loadedPallets={loadedPallets.map(p => ({ ...p, updatedAt: p.updatedAt.toISOString() }))}

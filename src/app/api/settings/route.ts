@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { safeAuth } from "@/lib/safe-auth";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
+import { rolesOfUser } from "@/lib/roles";
 
 const NUMERIC_KEYS = ["return_window_days", "low_inventory_threshold"];
 const STRING_KEYS = ["label_company_name", "label_company_tagline", "label_accent_color", "label_footer_text"];
@@ -23,7 +24,7 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   const session = await safeAuth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "administrator") {
+  if (!rolesOfUser(session.user).includes("administrator")) {
     return NextResponse.json({ error: "Forbidden — Administrator only" }, { status: 403 });
   }
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { safeAuth } from "@/lib/safe-auth";
 import { prisma } from "@/lib/db";
+import { rolesOfUser } from "@/lib/roles";
 
 export async function GET() {
   const session = await safeAuth();
@@ -12,7 +13,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await safeAuth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!["administrator", "manager"].includes(session.user.role)) {
+  if (!rolesOfUser(session.user).some((r) => ["administrator", "manager"].includes(r))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const body = await req.json();
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const session = await safeAuth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!["administrator", "manager"].includes(session.user.role)) {
+  if (!rolesOfUser(session.user).some((r) => ["administrator", "manager"].includes(r))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const body = await req.json();
@@ -54,7 +55,7 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const session = await safeAuth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "administrator") {
+  if (!rolesOfUser(session.user).includes("administrator")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const { searchParams } = new URL(req.url);

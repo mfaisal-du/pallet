@@ -14,7 +14,7 @@ export default async function AuditPage() {
   });
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <AuditPageClient
         entries={entries.map((e) => ({
           ...e,

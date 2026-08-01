@@ -11,7 +11,7 @@ export default async function ReportsPage() {
   const palletCount = await prisma.pallet.count();
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <ReportsPageClient initialPalletCount={palletCount} />
     </AdminShell>
   );

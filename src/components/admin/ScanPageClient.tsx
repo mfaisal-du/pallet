@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { useToast } from "@/components/ui/Toast";
-import { STATUS_LABELS, STATUS_COLORS } from "@/lib/pallet-machine";
-import type { Role } from "@prisma/client";
+import { STATUS_COLORS } from "@/lib/pallet-machine";
+import { useStatusLabels } from "@/components/layout/StatusLabelsProvider";
+import type { Role, PalletStatus } from "@prisma/client";
 import {
   QrCode, Package, ArrowRight, CheckCircle2,
   Loader2, XCircle, Lock, MapPin, RotateCcw, Truck, RefreshCw,
@@ -56,12 +57,16 @@ const ACTION_ICONS: Record<string, typeof Truck> = {
 export function ScanPageClient({
   userName,
   userRole,
+  userRoles,
 }: {
   userName: string;
   userRole: Role;
+  userRoles?: Role[];
 }) {
   const toast = useToast();
-  const canRegister = userRole === "administrator" || userRole === "manufacturing";
+  const labels = useStatusLabels();
+  const roles = userRoles && userRoles.length > 0 ? userRoles : [userRole];
+  const canRegister = roles.includes("administrator") || roles.includes("manufacturing");
 
   const [lookup, setLookup] = useState<LookupState>({ kind: "idle" });
   const [actionDone, setActionDone] = useState<{ palletNumber: string; newStatus: string } | null>(null);
@@ -71,7 +76,8 @@ export function ScanPageClient({
   const [fleetTrucks, setFleetTrucks] = useState<FleetTruck[]>([]);
   const [fleetDrivers, setFleetDrivers] = useState<FleetDriver[]>([]);
   useEffect(() => {
-    const canDispatch = userRole === "dispatcher" || userRole === "administrator" || userRole === "manager";
+    const canDispatch =
+      roles.includes("dispatcher") || roles.includes("administrator") || roles.includes("manager");
     if (!canDispatch) return;
     fetch("/api/fleet/trucks").then(r => r.json()).then(d => setFleetTrucks((d.trucks || []).filter((t: FleetTruck) => t.active)));
     fetch("/api/fleet/drivers").then(r => r.json()).then(d => setFleetDrivers((d.drivers || []).filter((dr: FleetDriver) => dr.active)));
@@ -111,7 +117,16 @@ export function ScanPageClient({
       if (!data.permitted) {
         setLookup({ kind: "denied", pallet: data.pallet });
       } else {
-        setLookup({ kind: "ready", pallet: data.pallet, transition: data.transition ?? null, roleTransitions: data.roleTransitions ?? [] });
+        const transition: TransitionInfo | null = data.transition ?? null;
+        setLookup({ kind: "ready", pallet: data.pallet, transition, roleTransitions: data.roleTransitions ?? [] });
+        // Phase 3: auto-fill Collector (return pickup) and Inspector (factory receive)
+        // with the logged-in user's name — editable, not locked.
+        if (transition?.action === "return_pickup") {
+          setPickupForm((f) => ({ ...f, pickupDriver: userName }));
+        }
+        if (transition?.action === "receive_factory" || transition?.action === "mark_damaged") {
+          setReceiveForm((f) => ({ ...f, inspector: userName }));
+        }
       }
     } catch {
       setLookup({ kind: "error", message: "Network error — check your connection" });
@@ -139,7 +154,7 @@ export function ScanPageClient({
       });
       const data = await res.json();
       if (res.ok) {
-        const newStatus = STATUS_LABELS[data.pallet.status as keyof typeof STATUS_LABELS] || data.pallet.status;
+        const newStatus = labels[data.pallet.status as PalletStatus] || data.pallet.status;
         setActionDone({ palletNumber: lookup.pallet.palletNumber, newStatus });
         toast.success(`${lookup.pallet.palletNumber} → ${newStatus}`);
         setLookup({ kind: "idle" });
@@ -165,14 +180,25 @@ export function ScanPageClient({
     if (!truck.trim()) { toast.error("Truck number is required"); return; }
     if (!driver.trim()) { toast.error("Driver name is required"); return; }
     if (!dispatchForm.destination.trim()) { toast.error("Destination is required"); return; }
-    submitAction("dispatch", { ...dispatchForm, truckNumber: truck, driverName: driver });
+    // Link the dispatch to the actual fleet records when selected from the list
+    const fleetTruck = fleetTrucks.find(t => t.plateNumber === truck.trim());
+    const fleetDriver = fleetDrivers.find(d => d.name === driver.trim());
+    submitAction("dispatch", {
+      ...dispatchForm,
+      truckNumber: truck,
+      driverName: driver,
+      truckId: fleetTruck?.id ?? null,
+      driverId: fleetDriver?.id ?? null,
+      driverContact: dispatchForm.driverContact.trim() || fleetDriver?.phone || "",
+    });
   }
   function handleDeliverSubmit() {
     if (!deliverForm.receiverName.trim()) { toast.error("Receiver name is required"); return; }
     submitAction("deliver", deliverForm);
   }
   function handlePickupSubmit() {
-    if (!pickupForm.pickupDriver.trim()) { toast.error("Pickup driver is required"); return; }
+    if (!pickupForm.pickupDriver.trim()) { toast.error("Collector name is required"); return; }
+    if (pickupForm.condition === "Damaged" && !pickupForm.notes.trim()) { toast.error("Please describe the damage in the notes"); return; }
     submitAction("return_pickup", pickupForm);
   }
   function handleReceiveSubmit() {
@@ -306,7 +332,7 @@ export function ScanPageClient({
                     <p className="text-sm font-bold text-amber-900">Permission denied</p>
                     <p className="text-xs text-amber-700">
                       Your role cannot perform the next action on a pallet with status{" "}
-                      <strong>{STATUS_LABELS[lookup.pallet.status as keyof typeof STATUS_LABELS] || lookup.pallet.status}</strong>.
+                      <strong>{labels[lookup.pallet.status as PalletStatus] || lookup.pallet.status}</strong>.
                     </p>
                   </div>
                 </div>
@@ -348,6 +374,7 @@ export function ScanPageClient({
 }
 
 function PalletInfoCard({ pallet }: { pallet: PalletLookupData }) {
+  const labels = useStatusLabels();
   const tone = (STATUS_COLORS[pallet.status as keyof typeof STATUS_COLORS] as string) || "blue";
   return (
     <div className="rounded-2xl border border-line bg-surface p-4">
@@ -356,7 +383,7 @@ function PalletInfoCard({ pallet }: { pallet: PalletLookupData }) {
           <p className="font-mono text-xs font-bold text-muted uppercase tracking-wide">Pallet found</p>
           <p className="font-display text-lg font-bold text-navy-900">{pallet.palletNumber}</p>
         </div>
-        <Badge tone={tone as never}>{STATUS_LABELS[pallet.status as keyof typeof STATUS_LABELS] || pallet.status}</Badge>
+        <Badge tone={tone as never}>{labels[pallet.status as PalletStatus] || pallet.status}</Badge>
       </div>
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
         <span>{pallet.materialType}</span>
@@ -403,6 +430,7 @@ function ActionForm({
   fleetTrucks: FleetTruck[];
   fleetDrivers: FleetDriver[];
 }) {
+  const labels = useStatusLabels();
   const action = transition.action;
   const Icon = ACTION_ICONS[action] || ArrowRight;
 
@@ -549,9 +577,10 @@ function ActionForm({
       {action === "return_pickup" && (
         <div className="space-y-3">
           <div>
-            <label className="text-xs font-bold uppercase text-muted">Pickup Driver *</label>
-            <input className="input-premium mt-1 text-sm" placeholder="Driver name" value={pickupForm.pickupDriver}
+            <label className="text-xs font-bold uppercase text-muted">Collector *</label>
+            <input className="input-premium mt-1 text-sm" placeholder="Collector name" value={pickupForm.pickupDriver}
               onChange={(e) => setPickupForm({ ...pickupForm, pickupDriver: e.target.value })} />
+            <p className="mt-1 text-[11px] text-muted">Prefilled with your name — edit if a different person is physically collecting.</p>
           </div>
           <div>
             <label className="text-xs font-bold uppercase text-muted">Pallet Condition *</label>
@@ -564,14 +593,28 @@ function ActionForm({
                 </label>
               ))}
             </div>
+            {pickupForm.condition === "Damaged" && (
+              <p className="mt-1 text-xs text-red-700">→ A <strong>damage report</strong> will be logged automatically for this pallet.</p>
+            )}
+            {pickupForm.condition === "Good" && (
+              <p className="mt-1 text-xs text-emerald-700">→ Pallet proceeds to factory receiving on return.</p>
+            )}
           </div>
           <div>
             <label className="text-xs font-bold uppercase text-muted">Pickup Notes</label>
-            <textarea className="input-premium mt-1 text-sm" rows={2} placeholder="Optional notes" value={pickupForm.notes}
+            <textarea className="input-premium mt-1 text-sm" rows={2}
+              placeholder={pickupForm.condition === "Damaged" ? "Describe the damage (required)…" : "Optional notes"}
+              value={pickupForm.notes}
               onChange={(e) => setPickupForm({ ...pickupForm, notes: e.target.value })} />
           </div>
           <Button fullWidth disabled={submitting} onClick={onPickup} className="!min-h-[44px]">
-            {submitting ? <><Loader2 size={15} className="animate-spin" /> Saving…</> : <><RotateCcw size={15} /> Record Return Pickup</>}
+            {submitting ? (
+              <><Loader2 size={15} className="animate-spin" /> Saving…</>
+            ) : pickupForm.condition === "Damaged" ? (
+              <><AlertTriangle size={15} /> Record Pickup &amp; Report Damage</>
+            ) : (
+              <><RotateCcw size={15} /> Record Return Pickup</>
+            )}
           </Button>
         </div>
       )}
@@ -582,6 +625,7 @@ function ActionForm({
             <label className="text-xs font-bold uppercase text-muted">Inspector Name *</label>
             <input className="input-premium mt-1 text-sm" placeholder="Inspector name" value={receiveForm.inspector}
               onChange={(e) => setReceiveForm({ ...receiveForm, inspector: e.target.value })} />
+            <p className="mt-1 text-[11px] text-muted">Prefilled with your name — edit if a different person is inspecting.</p>
           </div>
           <div>
             <label className="text-xs font-bold uppercase text-muted">Condition *</label>
@@ -594,8 +638,8 @@ function ActionForm({
                 </label>
               ))}
             </div>
-            {receiveForm.condition === "Good" && <p className="mt-1 text-xs text-emerald-700">→ Pallet returns to <strong>Available</strong> and trip count +1</p>}
-            {receiveForm.condition === "Damaged" && <p className="mt-1 text-xs text-red-700">→ Pallet flagged as <strong>Damaged</strong></p>}
+            {receiveForm.condition === "Good" && <p className="mt-1 text-xs text-emerald-700">→ Pallet returns to <strong>{labels.available}</strong> and trip count +1</p>}
+            {receiveForm.condition === "Damaged" && <p className="mt-1 text-xs text-red-700">→ Pallet flagged as <strong>{labels.damaged}</strong> and a damage report is created.</p>}
           </div>
           {receiveForm.condition === "Damaged" && (
             <div>
@@ -644,8 +688,8 @@ function ActionForm({
 
       {(action === "begin_repair" || action === "complete_repair" || action === "retire") && (
         <div className="space-y-3">
-          {action === "begin_repair" && <p className="text-xs text-blue-800">Pallet will move from <strong>Damaged</strong> → <strong>Under Repair</strong>.</p>}
-          {action === "complete_repair" && <p className="text-xs text-emerald-800">Pallet will move from <strong>Under Repair</strong> → <strong>Available</strong>.</p>}
+          {action === "begin_repair" && <p className="text-xs text-blue-800">Pallet will move from <strong>{labels.damaged}</strong> → <strong>{labels.under_repair}</strong>.</p>}
+          {action === "complete_repair" && <p className="text-xs text-emerald-800">Pallet will move from <strong>{labels.under_repair}</strong> → <strong>{labels.available}</strong>. Open damage reports are resolved automatically, and this does <strong>not</strong> count as a completed trip.</p>}
           {action === "retire" && (
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700 font-semibold">
               ⚠ Retiring a pallet is permanent. It will be removed from active circulation.

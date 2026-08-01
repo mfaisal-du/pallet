@@ -11,7 +11,8 @@ import { useToast } from "@/components/ui/Toast";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { AdminDataToolbar, type DataViewMode } from "@/components/admin/AdminDataToolbar";
 import { PalletQrLabel } from "@/components/admin/PalletQrLabel";
-import { STATUS_LABELS, STATUS_COLORS, type PalletStatus } from "@/lib/pallet-machine";
+import { STATUS_COLORS, type PalletStatus } from "@/lib/pallet-machine";
+import { useStatusLabels } from "@/components/layout/StatusLabelsProvider";
 import {
   AlertTriangle,
   Ban,
@@ -49,12 +50,12 @@ type Filter = "all" | "available" | "in_transit" | "returning" | "damaged" | "un
 
 const PAGE_SIZE = 50;
 
-const STATUS_FILTERS: { key: Filter; label: string }[] = [
+const STATUS_FILTERS: { key: Filter; label?: string; statusKey?: PalletStatus }[] = [
   { key: "all", label: "All" },
-  { key: "available", label: "Available" },
-  { key: "in_transit", label: "In transit" },
-  { key: "returning", label: "Returning" },
-  { key: "damaged", label: "Damaged" },
+  { key: "available", statusKey: "available" },
+  { key: "in_transit", statusKey: "in_transit" },
+  { key: "returning", statusKey: "returning" },
+  { key: "damaged", statusKey: "damaged" },
   { key: "unprinted", label: "Unprinted" },
   { key: "today", label: "Created today" },
   { key: "voided", label: "Voided" },
@@ -78,18 +79,22 @@ const DEFAULT_MATERIAL_TYPES = ["plastic", "wood", "metal", "composite"];
 export function AdminPalletsClient({
   initialPallets,
   userRole = "warehouse_loader",
+  userRoles,
   materialTypes = DEFAULT_MATERIAL_TYPES,
   initialFilter,
 }: {
   initialPallets: Pallet[];
   userRole?: string;
+  userRoles?: string[];
   materialTypes?: string[];
   initialFilter?: string;
 }) {
   const toast = useToast();
-  const canRegister = userRole === "administrator" || userRole === "manufacturing";
-  const canVoid = userRole === "administrator";
-  const isAdmin = userRole === "administrator" || userRole === "manager";
+  const labels = useStatusLabels();
+  const roles = userRoles && userRoles.length > 0 ? userRoles : [userRole];
+  const canRegister = roles.includes("administrator") || roles.includes("manufacturing");
+  const canVoid = roles.includes("administrator");
+  const isAdmin = roles.includes("administrator") || roles.includes("manager");
   const [pallets, setPallets] = useState<Pallet[]>(initialPallets);
   const [filter, setFilter] = useState<Filter>(
     initialFilter ? (URL_TO_FILTER[initialFilter] ?? "all") : "all"
@@ -296,9 +301,9 @@ export function AdminPalletsClient({
       {/* KPI strip */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
         <KpiCard label="Active" value={kpis.active} gradient="from-blue-500 to-blue-700" icon={Package} />
-        <KpiCard label="Available" value={kpis.available} gradient="from-emerald-500 to-emerald-700" icon={CheckCircle2} />
-        <KpiCard label="In transit" value={kpis.inTransit} gradient="from-violet-500 to-purple-700" icon={Truck} />
-        <KpiCard label="Damaged" value={kpis.damaged} gradient="from-orange-500 to-red-600" icon={AlertTriangle} highlight={kpis.damaged > 0} />
+        <KpiCard label={labels.available} value={kpis.available} gradient="from-emerald-500 to-emerald-700" icon={CheckCircle2} />
+        <KpiCard label={labels.in_transit} value={kpis.inTransit} gradient="from-violet-500 to-purple-700" icon={Truck} />
+        <KpiCard label={labels.damaged} value={kpis.damaged} gradient="from-orange-500 to-red-600" icon={AlertTriangle} highlight={kpis.damaged > 0} />
         <KpiCard label="Unprinted" value={kpis.unprinted} gradient="from-amber-500 to-orange-600" icon={Printer} highlight={kpis.unprinted > 0} />
         <KpiCard label="Total trips" value={kpis.totalTrips} gradient="from-sky-500 to-blue-600" icon={RotateCcw} />
       </div>
@@ -335,7 +340,7 @@ export function AdminPalletsClient({
             {STATUS_FILTERS.map((f) => (
               <button key={f.key} onClick={() => { setFilter(f.key); setVisibleCount(PAGE_SIZE); }}
                 className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${filter === f.key ? "bg-navy-900 text-white shadow-md" : "bg-white text-muted ring-1 ring-line hover:bg-surface"}`}>
-                {f.label}
+                {f.statusKey ? labels[f.statusKey] : f.label}
               </button>
             ))}
             {isAdmin && (
@@ -405,7 +410,7 @@ export function AdminPalletsClient({
                       <p className="text-[11px] text-muted">{p.dimensions}</p>
                     </td>
                     <td className="px-4 py-3.5"><span className="text-xs font-bold capitalize">{p.materialType}</span></td>
-                    <td className="px-4 py-3.5"><Badge tone={STATUS_COLORS[p.status] as never}>{STATUS_LABELS[p.status]}</Badge></td>
+                    <td className="px-4 py-3.5"><Badge tone={STATUS_COLORS[p.status] as never}>{labels[p.status]}</Badge></td>
                     <td className="px-4 py-3.5"><span className="font-mono text-sm font-bold">{p.tripCount}</span></td>
                     <td className="px-4 py-3.5">{actionsFor(p)}</td>
                   </tr>
@@ -442,7 +447,7 @@ export function AdminPalletsClient({
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone={STATUS_COLORS[p.status] as never}>{STATUS_LABELS[p.status]}</Badge>
+                  <Badge tone={STATUS_COLORS[p.status] as never}>{labels[p.status]}</Badge>
                   {actionsFor(p)}
                 </div>
               </div>
@@ -471,7 +476,7 @@ export function AdminPalletsClient({
                     {bulkMode && <button onClick={() => toggleSelect(p.id)}>{selectedIds.has(p.id) ? <CheckSquare size={16} className="text-blue-700" /> : <Square size={16} className="text-muted" />}</button>}
                     <Link href={`/admin/pallets/${p.id}`} className="mono-code text-xs font-bold text-navy-900 hover:underline">{p.palletNumber}</Link>
                   </div>
-                  <Badge tone={STATUS_COLORS[p.status] as never}>{STATUS_LABELS[p.status]}</Badge>
+                  <Badge tone={STATUS_COLORS[p.status] as never}>{labels[p.status]}</Badge>
                 </div>
                 {!p.printedAt && p.status === "available" && <span className="mt-1 inline-block rounded-full bg-amber-100 px-1.5 py-0.5 text-[9px] font-bold text-amber-700">unprinted</span>}
                 <p className="mt-2 text-sm font-semibold text-ink">{p.materialType} pallet</p>

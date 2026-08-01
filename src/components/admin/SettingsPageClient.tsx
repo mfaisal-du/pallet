@@ -7,8 +7,12 @@ import { useToast } from "@/components/ui/Toast";
 import {
   Settings, Loader2, Tag, RotateCcw, AlertCircle,
   Package, Plus, X, CheckCircle2, Database, Trash2, FlaskConical, ShieldAlert,
+  Tags, RefreshCcw, Save,
 } from "lucide-react";
 import type { LabelConfig } from "@/lib/label-settings";
+import type { PalletStatus } from "@prisma/client";
+import { STATUS_LABELS as DEFAULT_STATUS_LABELS } from "@/lib/pallet-machine";
+import { STATUS_LABEL_KEYS, ALL_STATUSES } from "@/lib/status-labels";
 
 const DEFAULT_MATERIAL_TYPES = ["plastic", "wood", "metal", "composite"];
 
@@ -58,11 +62,13 @@ export function SettingsPageClient({
   lowInventoryThreshold,
   labelConfig,
   initialMaterialTypes,
+  initialStatusLabels,
 }: {
   returnWindow: string;
   lowInventoryThreshold: string;
   labelConfig: LabelConfig;
   initialMaterialTypes: string[];
+  initialStatusLabels: Record<PalletStatus, string>;
 }) {
   const toast = useToast();
 
@@ -82,6 +88,59 @@ export function SettingsPageClient({
   const [materialTypes, setMaterialTypes] = useState<string[]>(initialMaterialTypes);
   const [newMaterial, setNewMaterial] = useState("");
   const [savingMaterials, setSavingMaterials] = useState(false);
+
+  // Status labels (persisted to DB)
+  const [statusLabels, setStatusLabels] = useState<Record<PalletStatus, string>>(initialStatusLabels);
+  const [savingStatusLabels, setSavingStatusLabels] = useState(false);
+
+  async function handleSaveStatusLabels() {
+    const trimmed: Record<string, string> = {};
+    for (const status of ALL_STATUSES) {
+      const v = (statusLabels[status] || "").trim();
+      if (!v) { toast.error(`Label for "${STATUS_LABEL_KEYS[status]}" cannot be empty`); return; }
+      trimmed[status] = v;
+    }
+    setSavingStatusLabels(true);
+    try {
+      const res = await fetch("/api/settings/status-labels", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ labels: trimmed }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Status labels saved — visible across all pallet screens");
+        setStatusLabels({ ...initialStatusLabels, ...data.labels });
+      } else {
+        toast.error(data.error || "Failed to save status labels");
+      }
+    } catch {
+      toast.error("Network error");
+    } finally {
+      setSavingStatusLabels(false);
+    }
+  }
+
+  async function handleResetStatusLabels() {
+    const defaults: Record<string, string> = {};
+    for (const status of ALL_STATUSES) defaults[status] = DEFAULT_STATUS_LABELS[status];
+    setStatusLabels({ ...DEFAULT_STATUS_LABELS });
+    setSavingStatusLabels(true);
+    try {
+      const res = await fetch("/api/settings/status-labels", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ labels: defaults }),
+      });
+      const data = await res.json();
+      if (res.ok) toast.success("Status labels reset to defaults");
+      else toast.error(data.error || "Failed to reset status labels");
+    } catch {
+      toast.error("Network error");
+    } finally {
+      setSavingStatusLabels(false);
+    }
+  }
 
   // DB management
   const [dbAction, setDbAction] = useState<"clear_pallets" | "seed_pallets" | "clear_audit" | null>(null);
@@ -405,6 +464,48 @@ export function SettingsPageClient({
         <div className="mt-5 flex justify-end">
           <Button onClick={handleSaveLabel} disabled={savingLabel} className="!min-h-[42px] !px-6">
             {savingLabel ? <><Loader2 size={14} className="animate-spin" /> Saving&hellip;</> : <><Tag size={14} /> Save label branding</>}
+          </Button>
+        </div>
+      </div>
+
+      {/* ── SECTION 3.5: Status Labels ── */}
+      <div className="premium-card !p-4 sm:!p-6">
+        <SectionHeader
+          icon={<Tags size={18} />}
+          title="Status Labels"
+          subtitle="Rename how pallet statuses appear across every screen (client terminology)"
+        />
+        <p className="mt-3 rounded-xl border border-blue-100 bg-blue-50/60 px-4 py-3 text-xs text-blue-900">
+          These labels replace the default names everywhere a pallet status is shown — Scan,
+          Pallets, Pallet Profile, Command Center, Dashboard, Dispatch and Reports. Internal
+          status identifiers stay unchanged, so reports, filters and the audit trail keep working.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {ALL_STATUSES.map((status) => (
+            <div key={status} className="rounded-xl border border-line bg-surface p-3">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted">
+                {STATUS_LABEL_KEYS[status].replace("status_label_", "").replace(/_/g, " ")}
+              </label>
+              <input
+                className="input-premium mt-1.5 w-full text-sm font-semibold"
+                maxLength={40}
+                value={statusLabels[status]}
+                onChange={(e) => setStatusLabels({ ...statusLabels, [status]: e.target.value })}
+                placeholder={DEFAULT_STATUS_LABELS[status]}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <button
+            onClick={handleResetStatusLabels}
+            disabled={savingStatusLabels}
+            className="flex items-center gap-1.5 rounded-xl border border-line bg-white px-4 py-2.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+          >
+            <RefreshCcw size={13} /> Reset to defaults
+          </button>
+          <Button onClick={handleSaveStatusLabels} disabled={savingStatusLabels} className="!min-h-[42px] !px-6">
+            {savingStatusLabels ? <><Loader2 size={14} className="animate-spin" /> Saving&hellip;</> : <><Save size={14} /> Save status labels</>}
           </Button>
         </div>
       </div>

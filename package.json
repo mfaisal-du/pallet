@@ -9,6 +9,7 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:backfill-drivers": "tsx prisma/backfill-dispatch-drivers.ts",
     "db:studio": "prisma studio",
     "test": "vitest run",
     "postinstall": "prisma generate"

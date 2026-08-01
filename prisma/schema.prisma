@@ -66,7 +66,8 @@ model User {
   name         String
   phone        String?
   passwordHash String   @map("password_hash") @db.VarChar(255)
-  role         Role     @default(delivery_receiver)
+  role         Role     @default(delivery_receiver) // primary role (display / legacy / home path)
+  roles        Json     @default("[]") // full role set — authorization uses this (Phase 4)
   active       Boolean  @default(true)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
@@ -76,6 +77,7 @@ model User {
   notifications      Notification[]
   palletsHeld        Pallet[]         @relation("PalletHolder")
   damageReports      DamageRecord[]   @relation("DamageReporter")
+  tripsCreated       Trip[]           @relation("TripCreator")
 
   @@map("users")
 }
@@ -135,21 +137,76 @@ model Movement {
 
   // Form payload snapshots per action type (JSON encoded)
   // FR-3.1 load: {products:[{sku,qty,lot,weight}]}
-  // FR-4.1 dispatch: {truckNumber, driverName, driverContact, destination, expectedDelivery, notes}
+  // FR-4.1 dispatch: {truckNumber, driverName, driverContact, destination, expectedDelivery, notes, truckId?, driverId?}
   // FR-5.1 deliver: {receiverName, receiverContact, signatureUrl?, photoUrls?[]}
   // FR-6.1 pickup: {pickupDriver, condition, notes}
   // FR-7.1 receive: {inspector, checklist, condition, damageDesc?, photoUrls?[]}
   payload     Json?
 
   note        String?        @db.VarChar(500)
+  /// Batch-scanning session this movement belongs to (Phase 2)
+  tripId      String?        @map("trip_id")
   createdAt   DateTime       @default(now()) @map("created_at")
 
   pallet      Pallet         @relation(fields: [palletId], references: [id], onDelete: Cascade)
   user        User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  trip        Trip?          @relation(fields: [tripId], references: [id], onDelete: SetNull)
 
   @@index([palletId, createdAt])
   @@index([action])
+  @@index([tripId])
   @@map("movements")
+}
+
+// ============================================================
+// TRIPS — batch-scanning sessions (Phase 2; client Q2/Q5/Q6)
+// One header saved once, then many pallets scanned onto it.
+// ============================================================
+enum TripType {
+  dispatch
+  return_collection
+  factory_receive
+}
+
+enum TripStatus {
+  open
+  closed
+  cancelled
+}
+
+model Trip {
+  id           String      @id @default(cuid())
+  type         TripType
+  status       TripStatus  @default(open)
+
+  // Dispatch header (Q2) — truck + driver + destination saved once
+  truckId      String?     @map("truck_id")
+  truckNumber  String?     @map("truck_number") @db.VarChar(30)
+  driverId     String?     @map("driver_id")
+  driverName   String?     @map("driver_name") @db.VarChar(100)
+  destination  String?     @db.VarChar(120)
+  expectedDelivery DateTime? @map("expected_delivery") @db.Date
+  notes        String?     @db.VarChar(500)
+
+  // Return flow header (Q5/Q6) — Collector / Inspector prefilled from session
+  collector    String?     @db.VarChar(100)
+  inspector    String?     @db.VarChar(100)
+
+  // Counters
+  scannedCount Int         @default(0) @map("scanned_count")
+  failedCount  Int         @default(0) @map("failed_count")
+
+  createdById  String?     @map("created_by_id")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  closedAt     DateTime?   @map("closed_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  createdBy    User?       @relation("TripCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  movements    Movement[]
+
+  @@index([type, status])
+  @@index([createdById])
+  @@map("trips")
 }
 
 // ============================================================
@@ -246,11 +303,13 @@ model Truck {
   capacity         Int      @default(0)
   active           Boolean  @default(true)
   notes            String?  @db.VarChar(255)
-  /// Currently assigned driver ID (optional, soft reference)
+  /// Currently assigned driver (real FK relation to the Driver record)
   assignedDriverId String?  @map("assigned_driver_id") @db.VarChar(30)
+  driver           Driver?  @relation("TruckAssignment", fields: [assignedDriverId], references: [id], onDelete: SetNull)
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
+  @@index([assignedDriverId])
   @@map("trucks")
 }
 
@@ -263,6 +322,8 @@ model Driver {
   notes     String?  @db.VarChar(255)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  trucks Truck[] @relation("TruckAssignment")
 
   @@map("drivers")
 }

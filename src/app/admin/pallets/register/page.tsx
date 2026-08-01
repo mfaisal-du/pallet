@@ -4,13 +4,14 @@ import { prisma } from "@/lib/db";
 import { AdminShell } from "@/components/layout/AdminShell";
 import { RegisterPalletClient } from "@/components/admin/RegisterPalletClient";
 import { getLabelSettings } from "@/lib/label-settings";
+import { hasAnyRole, rolesOfUser } from "@/lib/roles";
 
 export default async function RegisterPalletPage() {
   const session = await safeAuth();
   if (!session?.user) redirect("/login");
 
-  const allowedRoles = ["administrator", "manufacturing"];
-  if (!allowedRoles.includes(session.user.role)) redirect("/admin/scan");
+  const roles = rolesOfUser(session.user);
+  if (!hasAnyRole(roles, ["administrator", "manufacturing"])) redirect("/admin/scan");
 
   const [labelConfig, materialTypesSetting] = await Promise.all([
     getLabelSettings(prisma),
@@ -23,7 +24,7 @@ export default async function RegisterPalletPage() {
   }
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <RegisterPalletClient
         userName={session.user.name}
         labelConfig={labelConfig}

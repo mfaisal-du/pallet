@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
   ]);
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <AdminDashboardClient
         userName={session.user.name}
         userCount={userCount}

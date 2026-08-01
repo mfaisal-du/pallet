@@ -22,10 +22,12 @@ import {
   X,
   Home,
   ChevronRight,
+  Layers,
 } from "lucide-react";
 import { LogoWordmark } from "@/components/brand/Logo";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-import { roleLabel } from "@/lib/roles";
+import { StatusLabelsProvider } from "@/components/layout/StatusLabelsProvider";
+import { roleLabel, roleSetLabel } from "@/lib/roles";
 import type { Role } from "@prisma/client";
 
 type NavItem = { href: string; label: string; icon: typeof LayoutDashboard; roles?: Role[] };
@@ -47,6 +49,7 @@ const ALL_NAV: NavGroup[] = [
     items: [
       { href: "/admin/pallets", label: "Pallets", icon: Package },
       { href: "/admin/scan", label: "Scan", icon: QrCode },
+      { href: "/admin/trips", label: "Batch Scan", icon: Layers, roles: ["administrator", "dispatcher", "return_collector", "factory_receiver", "manager"] },
       { href: "/admin/pallets/register", label: "Register Pallet", icon: PackagePlus, roles: ["administrator", "manufacturing"] },
     ],
   },
@@ -75,12 +78,12 @@ const ALL_NAV: NavGroup[] = [
   },
 ];
 
-function filterNav(role: Role): NavGroup[] {
+function filterNav(roles: Role[]): NavGroup[] {
   return ALL_NAV
-    .filter((g) => !g.roles || g.roles.includes(role))
+    .filter((g) => !g.roles || g.roles.some((r) => roles.includes(r)))
     .map((g) => ({
       ...g,
-      items: g.items.filter((item) => !item.roles || item.roles.includes(role)),
+      items: g.items.filter((item) => !item.roles || item.roles.some((r) => roles.includes(r))),
     }))
     .filter((g) => g.items.length > 0);
 }
@@ -96,6 +99,7 @@ function buildBreadcrumbs(pathname: string) {
     pallets: "Pallets",
     scan: "Scan",
     dispatch: "Dispatch",
+    trips: "Batch Scan",
     fleet: "Fleet",
     users: "Users",
     settings: "Settings",
@@ -123,13 +127,16 @@ export function AdminShell({
   children,
   userName,
   userRole,
+  userRoles,
 }: {
   children: ReactNode;
   userName: string;
   userRole: Role;
+  userRoles?: Role[];
 }) {
   const pathname = usePathname();
-  const navGroups = filterNav(userRole);
+  const roles = userRoles && userRoles.length > 0 ? userRoles : [userRole];
+  const navGroups = filterNav(roles);
   const flatNav = navGroups.flatMap((g) => g.items);
   const breadcrumbs = buildBreadcrumbs(pathname);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -140,6 +147,7 @@ export function AdminShell({
   }
 
   return (
+    <StatusLabelsProvider>
     <div className="flex h-dvh overflow-hidden bg-[linear-gradient(165deg,#e8eef8_0%,#f3f6fb_45%,#f8fafc_100%)]">
       {/* Mobile overlay */}
       <AnimatePresence>
@@ -192,7 +200,7 @@ export function AdminShell({
             </nav>
             <div className="safe-pb border-t border-white/10 p-4">
               <p className="text-[11px] text-slate-400 font-semibold">{userName}</p>
-              <p className="text-[10px] font-bold uppercase tracking-wide text-sky-200/70">{roleLabel(userRole)}</p>
+              <p className="text-[10px] font-bold uppercase tracking-wide text-sky-200/70">{roleSetLabel(roles)}</p>
               <div className="mt-2"><SignOutButton /></div>
             </div>
           </motion.aside>
@@ -205,7 +213,7 @@ export function AdminShell({
         <div className="relative border-b border-white/10 px-5 py-6">
           <LogoWordmark light />
           <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.16em] text-sky-200/70">
-            {roleLabel(userRole)}
+            {roleSetLabel(roles)}
           </p>
         </div>
 
@@ -292,7 +300,7 @@ export function AdminShell({
                 <div className="max-w-[6.5rem] min-w-0 text-right sm:max-w-[12rem]" title={userName}>
                   <p className="truncate text-xs font-bold text-slate-900">{userName}</p>
                   <p className="hidden truncate text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500 sm:block">
-                    {roleLabel(userRole)}
+                    {roleSetLabel(roles)}
                   </p>
                 </div>
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 text-xs font-bold text-white shadow-md shadow-blue-700/25">
@@ -356,5 +364,6 @@ export function AdminShell({
         </main>
       </div>
     </div>
+    </StatusLabelsProvider>
   );
 }

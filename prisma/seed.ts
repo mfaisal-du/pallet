@@ -6,14 +6,16 @@ const prisma = new PrismaClient();
 const PASSWORD = hashSync("password123", 10);
 
 const demoUsers = [
-  { email: "admin@pallettrack.local", name: "Admin User", role: Role.administrator },
-  { email: "manufacturing@pallettrack.local", name: "Factory Worker", role: Role.manufacturing },
-  { email: "loader@pallettrack.local", name: "Warehouse Loader", role: Role.warehouse_loader },
-  { email: "dispatcher@pallettrack.local", name: "Dispatcher", role: Role.dispatcher },
-  { email: "receiver@pallettrack.local", name: "Delivery Receiver", role: Role.delivery_receiver },
-  { email: "collector@pallettrack.local", name: "Return Collector", role: Role.return_collector },
-  { email: "factory@pallettrack.local", name: "Factory Receiver", role: Role.factory_receiver },
-  { email: "manager@pallettrack.local", name: "Operations Manager", role: Role.manager },
+  { email: "admin@pallettrack.local", name: "Admin User", roles: [Role.administrator] },
+  { email: "manufacturing@pallettrack.local", name: "Factory Worker", roles: [Role.manufacturing] },
+  { email: "loader@pallettrack.local", name: "Warehouse Loader", roles: [Role.warehouse_loader] },
+  { email: "dispatcher@pallettrack.local", name: "Dispatcher", roles: [Role.dispatcher] },
+  { email: "receiver@pallettrack.local", name: "Delivery Receiver", roles: [Role.delivery_receiver] },
+  { email: "collector@pallettrack.local", name: "Return Collector", roles: [Role.return_collector] },
+  { email: "factory@pallettrack.local", name: "Factory Receiver", roles: [Role.factory_receiver] },
+  { email: "manager@pallettrack.local", name: "Operations Manager", roles: [Role.manager] },
+  // Phase 4 demo — a single user combining dispatcher + delivery receiver (Q4)
+  { email: "combined@pallettrack.local", name: "Combined Dispatcher/Receiver", roles: [Role.dispatcher, Role.delivery_receiver] },
 ];
 
 async function main() {
@@ -21,15 +23,16 @@ async function main() {
   for (const u of demoUsers) {
     await prisma.user.upsert({
       where: { email: u.email },
-      update: {},
+      update: { roles: u.roles },
       create: {
         email: u.email,
         name: u.name,
-        role: u.role,
+        role: u.roles[0],
+        roles: u.roles,
         passwordHash: PASSWORD,
       },
     });
-    console.log(`  ✓ ${u.email} (${u.role})`);
+    console.log(`  ✓ ${u.email} (${u.roles.join("/")})`);
   }
 
   console.log("Seeding settings...");

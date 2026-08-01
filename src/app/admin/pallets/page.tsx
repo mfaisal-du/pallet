@@ -32,9 +32,10 @@ export default async function PalletsPage({
   }
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <AdminPalletsClient
         userRole={session.user.role}
+        userRoles={session.user.roles}
         materialTypes={materialTypes}
         initialFilter={status}
         initialPallets={pallets.map((p) => ({

@@ -8,7 +8,7 @@ export default async function NotificationsPage() {
   if (!session?.user) redirect("/login");
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <NotificationsPageClient />
     </AdminShell>
   );

@@ -1,8 +1,7 @@
 import NextAuth from "next-auth";
 import { NextResponse } from "next/server";
 import { authConfig } from "@/auth.config";
-import { canAccessPath, homePathForRole } from "@/lib/roles";
-import type { Role } from "@prisma/client";
+import { canAccessPath, homePathForRoles, rolesOfUser } from "@/lib/roles";
 
 const { auth } = NextAuth(authConfig);
 
@@ -32,14 +31,15 @@ export default auth((req) => {
   }
 
   const isLoggedIn = !!req.auth?.user;
-  const role = req.auth?.user?.role as Role | undefined;
+  const user = req.auth?.user;
+  const roles = user ? rolesOfUser(user as { role: string; roles?: unknown }) : [];
 
   const isAuthPage = pathname.startsWith("/login");
   const isProtected = pathname.startsWith("/admin");
 
   // If logged in and hitting login page, redirect to home
-  if (isAuthPage && isLoggedIn && role) {
-    return NextResponse.redirect(new URL(homePathForRole(role), req.url));
+  if (isAuthPage && isLoggedIn && roles.length > 0) {
+    return NextResponse.redirect(new URL(homePathForRoles(roles), req.url));
   }
 
   // If not logged in and hitting protected page, redirect to login
@@ -49,8 +49,10 @@ export default auth((req) => {
     return NextResponse.redirect(url);
   }
 
-  // If logged in but role can't access this path, redirect to unauthorized
-  if (isProtected && role && !canAccessPath(role, pathname)) {
+  // If logged in but no role can access this path, redirect to unauthorized.
+  // An empty role set is also denied — never let an unknown-role user bypass
+  // the access check.
+  if (isProtected && (roles.length === 0 || !canAccessPath(roles, pathname))) {
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 

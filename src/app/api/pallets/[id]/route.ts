@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { safeAuth } from "@/lib/safe-auth";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
+import { rolesOfUser } from "@/lib/roles";
 
 export async function GET(
   _req: NextRequest,
@@ -36,7 +37,7 @@ export async function PATCH(
 ) {
   const session = await safeAuth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "administrator") {
+  if (!rolesOfUser(session.user).includes("administrator")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -1,4 +1,4 @@
-import type { PalletStatus, MovementAction } from "@prisma/client";
+import type { PalletStatus, MovementAction, Role } from "@prisma/client";
 export type { PalletStatus };
 
 /**
@@ -13,7 +13,7 @@ type Transition = {
   from: PalletStatus;
   to: PalletStatus;
   action: MovementAction;
-  roles: string[];
+  roles: Role[];
   /** Human-readable label for the form presented on scan */
   formLabel: string;
 };
@@ -26,7 +26,7 @@ export const TRANSITIONS: Transition[] = [
   { from: "available",     to: "loaded",       action: "load",            roles: ["warehouse_loader", "administrator"], formLabel: "Load Products" },
   { from: "loaded",        to: "in_transit",   action: "dispatch",        roles: ["dispatcher", "administrator"],       formLabel: "Truck Assignment (Dispatch)" },
   { from: "in_transit",    to: "delivered",    action: "deliver",         roles: ["delivery_receiver", "administrator"],formLabel: "Delivery Confirmation" },
-  { from: "delivered",     to: "returning",    action: "return_pickup",   roles: ["return_collector", "administrator"], formLabel: "Return Pickup" },
+  { from: "delivered",     to: "returning",    action: "return_pickup",   roles: ["return_collector", "administrator"], formLabel: "Return Pickup (Collector)" },
   { from: "returning",     to: "available",    action: "receive_factory", roles: ["factory_receiver", "administrator"], formLabel: "Factory Receiving" },
   { from: "returning",     to: "damaged",      action: "mark_damaged",    roles: ["factory_receiver", "administrator"], formLabel: "Damage Report" },
   { from: "damaged",       to: "under_repair", action: "begin_repair",    roles: ["administrator"],                    formLabel: "Begin Repair" },
@@ -42,10 +42,12 @@ export const TRANSITIONS: Transition[] = [
 ];
 
 /**
- * Get the next transition for a pallet's current status and user role.
+ * Get the next transition for a pallet's current status and the user's roles.
+ * A user may hold multiple roles (Phase 4) — the transition matches when ANY
+ * of their roles is allowed.
  */
-export function getNextTransition(status: PalletStatus, role: string): Transition | null {
-  const match = TRANSITIONS.find((t) => t.from === status && t.roles.includes(role));
+export function getNextTransition(status: PalletStatus, roles: Role[]): Transition | null {
+  const match = TRANSITIONS.find((t) => t.from === status && t.roles.some((r) => roles.includes(r)));
   return match || null;
 }
 
@@ -59,8 +61,8 @@ export function getTransitionsFrom(status: PalletStatus): Transition[] {
 /**
  * Map a status to the role(s) permitted for the next action.
  */
-export function getRolesForStatus(status: PalletStatus): string[] {
-  const roles = new Set<string>();
+export function getRolesForStatus(status: PalletStatus): Role[] {
+  const roles = new Set<Role>();
   TRANSITIONS.filter((t) => t.from === status).forEach((t) => {
     t.roles.forEach((r) => roles.add(r));
   });
@@ -98,9 +100,10 @@ export const STATUS_COLORS: Record<PalletStatus, string> = {
 };
 
 /**
- * Check if a role can perform a scan action on a pallet with the given status.
+ * Check if a user (with their full role set) can perform a scan action on a
+ * pallet with the given status. Administrator always passes.
  */
-export function canScan(status: PalletStatus, role: string): boolean {
-  const t = getNextTransition(status, role);
-  return t !== null || role === "administrator";
+export function canScan(status: PalletStatus, roles: Role[]): boolean {
+  const t = getNextTransition(status, roles);
+  return t !== null || roles.includes("administrator");
 }

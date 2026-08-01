@@ -5,7 +5,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { PageReveal } from "@/components/motion/PageReveal";
 import { Badge } from "@/components/ui/Badge";
-import { STATUS_LABELS, STATUS_COLORS } from "@/lib/pallet-machine";
+import { STATUS_COLORS } from "@/lib/pallet-machine";
+import { useStatusLabels } from "@/components/layout/StatusLabelsProvider";
+import type { PalletStatus } from "@prisma/client";
 import { Search, Filter } from "lucide-react";
 
 type Pallet = {
@@ -26,6 +28,7 @@ const STATUS_OPTIONS = [
 ];
 
 export function PalletsPageClient({ initialPallets }: { initialPallets: Pallet[] }) {
+  const labels = useStatusLabels();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
@@ -89,7 +92,7 @@ export function PalletsPageClient({ initialPallets }: { initialPallets: Pallet[]
             <option value="">All statuses</option>
             {STATUS_OPTIONS.filter(Boolean).map((s) => (
               <option key={s} value={s}>
-                {STATUS_LABELS[s as keyof typeof STATUS_LABELS] || s}
+                {labels[s as PalletStatus] || s}
               </option>
             ))}
           </select>
@@ -125,7 +128,7 @@ export function PalletsPageClient({ initialPallets }: { initialPallets: Pallet[]
                       {p.palletNumber}
                     </p>
                     <Badge tone={(STATUS_COLORS[p.status as keyof typeof STATUS_COLORS] || "neutral") as "ok" | "teal" | "blue" | "neutral" | "field" | "dispatch" | "warn" | "danger"}>
-                      {STATUS_LABELS[p.status as keyof typeof STATUS_LABELS] || p.status}
+                      {labels[p.status as PalletStatus] || p.status}
                     </Badge>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-muted">

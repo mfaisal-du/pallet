@@ -9,8 +9,10 @@ import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { PalletQrLabel } from "@/components/admin/PalletQrLabel";
-import { STATUS_LABELS, STATUS_COLORS, getTransitionsFrom } from "@/lib/pallet-machine";
+import { STATUS_COLORS, getTransitionsFrom } from "@/lib/pallet-machine";
+import { useStatusLabels } from "@/components/layout/StatusLabelsProvider";
 import { formatDate, formatDateTime } from "@/lib/format-date";
+import type { PalletStatus } from "@prisma/client";
 import type { LabelConfig } from "@/lib/label-settings";
 import {
   ArrowLeft,
@@ -125,8 +127,9 @@ const ACTION_ICONS: Record<string, typeof Truck> = {
   retire: AlertTriangle,
 };
 
-export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletData; labelConfig: LabelConfig }) {
+export function PalletProfileClient({ pallet, labelConfig, userName }: { pallet: PalletData; labelConfig: LabelConfig; userName: string }) {
   const toast = useToast();
+  const labels = useStatusLabels();
   const [showAction, setShowAction] = useState(false);
   const [activeAction, setActiveAction] = useState<{ action: string; from: string; to: string; formLabel: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -151,8 +154,10 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
     setProducts([{ sku: "", qty: "", lot: "", weight: "" }]);
     setDispatchForm({ truckNumber: "", driverName: "", driverContact: "", destination: "", expectedDelivery: "", notes: "" });
     setDeliverForm({ receiverName: "", receiverContact: "", notes: "" });
-    setPickupForm({ pickupDriver: "", condition: "Good", notes: "" });
-    setReceiveForm({ inspector: "", condition: "Good", damageDesc: "", notes: "" });
+    // Phase 3: auto-fill Collector (return pickup) and Inspector (factory receive)
+    // with the logged-in user's name — editable, not locked.
+    setPickupForm({ pickupDriver: t.action === "return_pickup" ? userName : "", condition: "Good", notes: "" });
+    setReceiveForm({ inspector: t.action === "receive_factory" || t.action === "mark_damaged" ? userName : "", condition: "Good", damageDesc: "", notes: "" });
     setSimpleNote("");
     setShowAction(true);
   }
@@ -187,7 +192,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
         body: JSON.stringify({ palletId: pallet.id, action: finalAction, payload, note: simpleNote || null }),
       });
       if (res.ok) {
-        toast.success(`Pallet → ${STATUS_LABELS[activeAction.to as keyof typeof STATUS_LABELS] || activeAction.to}`);
+        toast.success(`Pallet → ${labels[activeAction.to as PalletStatus] || activeAction.to}`);
         setShowAction(false);
         window.location.reload();
       } else {
@@ -247,7 +252,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
             {/* Status badges */}
             <div className="flex flex-wrap gap-2">
               <Badge tone={STATUS_COLORS[pallet.status as keyof typeof STATUS_COLORS] as never || "blue"}>
-                {STATUS_LABELS[pallet.status as keyof typeof STATUS_LABELS] || pallet.status}
+                {labels[pallet.status as PalletStatus] || pallet.status}
               </Badge>
               <Badge tone="neutral">{pallet.materialType}</Badge>
               {isDamaged && <Badge tone="warn">Damaged</Badge>}
@@ -372,9 +377,9 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
                                 </span>
                                 {m.fromStatus && m.toStatus && (
                                   <Badge tone="blue">
-                                    {STATUS_LABELS[m.fromStatus as keyof typeof STATUS_LABELS] || m.fromStatus}
+                                    {labels[m.fromStatus as PalletStatus] || m.fromStatus}
                                     {" → "}
-                                    {STATUS_LABELS[m.toStatus as keyof typeof STATUS_LABELS] || m.toStatus}
+                                    {labels[m.toStatus as PalletStatus] || m.toStatus}
                                   </Badge>
                                 )}
                               </div>
@@ -467,7 +472,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
                       <div className="min-w-0">
                         <p className="text-sm font-bold text-navy-900">{t.formLabel}</p>
                         <p className="text-[11px] text-muted">
-                          {STATUS_LABELS[t.from as keyof typeof STATUS_LABELS]} → {STATUS_LABELS[t.to as keyof typeof STATUS_LABELS]}
+                          {labels[t.from as PalletStatus]} → {labels[t.to as PalletStatus]}
                         </p>
                       </div>
                     </button>
@@ -484,14 +489,14 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
         open={showAction && !!activeAction}
         onClose={() => setShowAction(false)}
         title={activeAction?.formLabel || "Perform Action"}
-        subtitle={`${pallet.palletNumber} · ${STATUS_LABELS[pallet.status as keyof typeof STATUS_LABELS] || pallet.status}`}
+        subtitle={`${pallet.palletNumber} · ${labels[pallet.status as PalletStatus] || pallet.status}`}
       >
         {activeAction && (
           <div className="space-y-4">
             <div className="rounded-xl bg-blue-50 p-3 text-xs font-semibold text-blue-900 ring-1 ring-blue-100">
-              {STATUS_LABELS[activeAction.from as keyof typeof STATUS_LABELS] || activeAction.from}
+              {labels[activeAction.from as PalletStatus] || activeAction.from}
               {" → "}
-              {STATUS_LABELS[activeAction.to as keyof typeof STATUS_LABELS] || activeAction.to}
+              {labels[activeAction.to as PalletStatus] || activeAction.to}
             </div>
 
             {/* LOAD form */}
@@ -577,9 +582,10 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
             {activeAction.action === "return_pickup" && (
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-bold uppercase text-muted">Pickup Driver *</label>
-                  <input className="input-premium mt-1 text-sm" placeholder="Driver name" value={pickupForm.pickupDriver}
+                  <label className="text-xs font-bold uppercase text-muted">Collector *</label>
+                  <input className="input-premium mt-1 text-sm" placeholder="Collector name" value={pickupForm.pickupDriver}
                     onChange={(e) => setPickupForm({ ...pickupForm, pickupDriver: e.target.value })} />
+                  <p className="mt-1 text-[11px] text-muted">Prefilled with your name — edit if a different person is physically collecting.</p>
                 </div>
                 <div>
                   <label className="text-xs font-bold uppercase text-muted">Condition *</label>
@@ -603,6 +609,7 @@ export function PalletProfileClient({ pallet, labelConfig }: { pallet: PalletDat
                   <label className="text-xs font-bold uppercase text-muted">Inspector Name *</label>
                   <input className="input-premium mt-1 text-sm" placeholder="Inspector name" value={receiveForm.inspector}
                     onChange={(e) => setReceiveForm({ ...receiveForm, inspector: e.target.value })} />
+                  <p className="mt-1 text-[11px] text-muted">Prefilled with your name — edit if a different person is inspecting.</p>
                 </div>
                 <div>
                   <label className="text-xs font-bold uppercase text-muted">Condition *</label>

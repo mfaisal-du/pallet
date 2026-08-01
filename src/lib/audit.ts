@@ -1,15 +1,20 @@
 import { prisma } from "@/lib/db";
 
-export async function logAudit(input: {
-  userId?: string | null;
-  userEmail?: string | null;
-  action: string;
-  entity?: string;
-  entityId?: string;
-  detail?: string;
-}) {
+type AuditClient = Pick<typeof prisma, "auditLog">;
+
+export async function logAudit(
+  input: {
+    userId?: string | null;
+    userEmail?: string | null;
+    action: string;
+    entity?: string;
+    entityId?: string;
+    detail?: string;
+  },
+  client: AuditClient = prisma
+) {
   try {
-    await prisma.auditLog.create({
+    await client.auditLog.create({
       data: {
         userId: input.userId || null,
         userEmail: input.userEmail || null,

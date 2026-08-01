@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { PageReveal, StaggerList, StaggerItem } from "@/components/motion/PageReveal";
+import { useStatusLabels } from "@/components/layout/StatusLabelsProvider";
+import type { PalletStatus } from "@prisma/client";
 import {
   Activity,
   Package,
@@ -57,6 +59,7 @@ export function AdminDashboardClient({
   recentPallets: PalletRow[];
 }) {
   const first = userName.split(" ")[0] || "Admin";
+  const labels = useStatusLabels();
   const [liveKpis, setLiveKpis] = useState(kpis);
 
   useEffect(() => {
@@ -92,7 +95,7 @@ export function AdminDashboardClient({
 
   const tiles = [
     {
-      label: "Available",
+      label: labels.available,
       value: String(liveKpis.available),
       hint: "Ready for loading",
       href: "/admin/pallets?status=available",
@@ -100,7 +103,7 @@ export function AdminDashboardClient({
       tone: "from-emerald-600 to-teal-500",
     },
     {
-      label: "In Transit",
+      label: labels.in_transit,
       value: String(liveKpis.inTransit),
       hint: "Currently dispatched",
       href: "/admin/pallets?status=in_transit",
@@ -108,7 +111,7 @@ export function AdminDashboardClient({
       tone: "from-violet-600 to-indigo-500",
     },
     {
-      label: "Returning",
+      label: labels.returning,
       value: String(liveKpis.returning),
       hint: "Awaiting factory receipt",
       href: "/admin/pallets?status=returning",
@@ -116,7 +119,7 @@ export function AdminDashboardClient({
       tone: "from-amber-500 to-yellow-500",
     },
     {
-      label: "Damaged",
+      label: labels.damaged,
       value: String(liveKpis.damaged),
       hint: "Needs attention",
       href: "/admin/pallets?status=damaged",
@@ -126,13 +129,13 @@ export function AdminDashboardClient({
   ];
 
   const pipeline = [
-    { l: "Available", v: liveKpis.available, c: "bg-emerald-500" },
-    { l: "Loaded", v: liveKpis.loaded, c: "bg-blue-500" },
-    { l: "In Transit", v: liveKpis.inTransit, c: "bg-violet-500" },
-    { l: "Delivered", v: liveKpis.delivered, c: "bg-sky-500" },
-    { l: "Returning", v: liveKpis.returning, c: "bg-amber-500" },
-    { l: "Damaged", v: liveKpis.damaged, c: "bg-red-500" },
-    { l: "Retired", v: liveKpis.retired, c: "bg-slate-400" },
+    { l: labels.available, v: liveKpis.available, c: "bg-emerald-500" },
+    { l: labels.loaded, v: liveKpis.loaded, c: "bg-blue-500" },
+    { l: labels.in_transit, v: liveKpis.inTransit, c: "bg-violet-500" },
+    { l: labels.delivered, v: liveKpis.delivered, c: "bg-sky-500" },
+    { l: labels.returning, v: liveKpis.returning, c: "bg-amber-500" },
+    { l: labels.damaged, v: liveKpis.damaged, c: "bg-red-500" },
+    { l: labels.retired, v: liveKpis.retired, c: "bg-slate-400" },
   ];
   const pipeMax = Math.max(...pipeline.map((p) => p.v), 1);
 
@@ -308,7 +311,7 @@ export function AdminDashboardClient({
                       </p>
                     </div>
                     <span className="inline-flex shrink-0 items-center rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-bold text-blue-800 ring-1 ring-blue-600/15">
-                      {p.status.replace(/_/g, " ")}
+                      {labels[p.status as PalletStatus] || p.status}
                     </span>
                   </Link>
                 </li>

@@ -46,7 +46,7 @@ export default async function PalletProfilePage({
   }
 
   return (
-    <AdminShell userName={session.user.name} userRole={session.user.role}>
+    <AdminShell userName={session.user.name} userRole={session.user.role} userRoles={session.user.roles}>
       <PalletProfileClient
         pallet={{
           ...pallet,
@@ -67,6 +67,7 @@ export default async function PalletProfilePage({
           qrDataUrl,
         }}
         labelConfig={labelConfig}
+        userName={session.user.name}
       />
     </AdminShell>
   );

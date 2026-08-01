@@ -9,6 +9,7 @@ import { Modal } from "@/components/ui/Modal";
 import { useToast } from "@/components/ui/Toast";
 import { formatDate } from "@/lib/format-date";
 import { roleLabel } from "@/lib/roles";
+import type { Role } from "@prisma/client";
 import {
   UserPlus, Search, Edit2, UserX, UserCheck,
   ChevronDown, ChevronUp, Shield, Activity,
@@ -19,6 +20,7 @@ type User = {
   email: string;
   name: string;
   role: string;
+  roles: Role[];
   active: boolean;
   createdAt: string;
   _count: { movements: number };
@@ -52,10 +54,10 @@ export function UsersPageClient() {
   const [search, setSearch] = useState("");
   const [collapsedRoles, setCollapsedRoles] = useState<Set<string>>(new Set());
   const [showAdd, setShowAdd] = useState(false);
-  const [addForm, setAddForm] = useState({ name: "", email: "", role: "warehouse_loader", password: "" });
+  const [addForm, setAddForm] = useState({ name: "", email: "", roles: ["warehouse_loader"] as Role[], password: "" });
   const [submittingAdd, setSubmittingAdd] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", role: "", password: "" });
+  const [editForm, setEditForm] = useState({ name: "", roles: [] as Role[], password: "" });
   const [submittingEdit, setSubmittingEdit] = useState(false);
   const toast = useToast();
 
@@ -73,7 +75,11 @@ export function UsersPageClient() {
     const q = search.toLowerCase();
     if (!q) return users;
     return users.filter(
-      (u) => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.role.toLowerCase().includes(q)
+      (u) =>
+        u.name.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.role.toLowerCase().includes(q) ||
+        (u.roles || []).some((r) => r.toLowerCase().includes(q))
     );
   }, [users, search]);
 
@@ -95,6 +101,20 @@ export function UsersPageClient() {
     });
   }
 
+  function toggleAddRole(r: Role) {
+    setAddForm((prev) => ({
+      ...prev,
+      roles: prev.roles.includes(r) ? prev.roles.filter((x) => x !== r) : [...prev.roles, r],
+    }));
+  }
+
+  function toggleEditRole(r: Role) {
+    setEditForm((prev) => ({
+      ...prev,
+      roles: prev.roles.includes(r) ? prev.roles.filter((x) => x !== r) : [...prev.roles, r],
+    }));
+  }
+
   async function handleAdd() {
     setSubmittingAdd(true);
     try {
@@ -107,7 +127,7 @@ export function UsersPageClient() {
         const data = await res.json();
         setUsers((prev) => [{ ...data.user, createdAt: new Date().toISOString(), _count: { movements: 0 }, active: true }, ...prev]);
         setShowAdd(false);
-        setAddForm({ name: "", email: "", role: "warehouse_loader", password: "" });
+        setAddForm({ name: "", email: "", roles: ["warehouse_loader"], password: "" });
         toast.success(`${data.user.name} created`);
       } else {
         const data = await res.json();
@@ -119,14 +139,14 @@ export function UsersPageClient() {
 
   function openEdit(u: User) {
     setEditUser(u);
-    setEditForm({ name: u.name, role: u.role, password: "" });
+    setEditForm({ name: u.name, roles: (u.roles && u.roles.length > 0 ? u.roles : [u.role as Role]), password: "" });
   }
 
   async function handleEdit() {
     if (!editUser) return;
     setSubmittingEdit(true);
     try {
-      const body: Record<string, unknown> = { id: editUser.id, name: editForm.name, role: editForm.role };
+      const body: Record<string, unknown> = { id: editUser.id, name: editForm.name, roles: editForm.roles };
       if (editForm.password) body.password = editForm.password;
       const res = await fetch("/api/users", {
         method: "PATCH",
@@ -253,7 +273,14 @@ export function UsersPageClient() {
                                 <p className="text-sm font-bold text-navy-900">{u.name}</p>
                                 {!u.active && <Badge tone="neutral">Inactive</Badge>}
                               </div>
-                              <p className="text-xs text-muted truncate">
+                              <div className="mt-1 flex flex-wrap items-center gap-1">
+                                {(u.roles && u.roles.length > 0 ? u.roles : [u.role]).map((r) => (
+                                  <span key={r} className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 ring-1 ring-blue-200/70">
+                                    <Shield size={8} /> {roleLabel(r as Parameters<typeof roleLabel>[0])}
+                                  </span>
+                                ))}
+                              </div>
+                              <p className="mt-1 text-xs text-muted truncate">
                                 {u.email}
                                 <span className="mx-1.5 text-slate-300">&middot;</span>
                                 <span className="inline-flex items-center gap-0.5"><Activity size={9} className="inline" /> {u._count.movements}</span>
@@ -291,10 +318,26 @@ export function UsersPageClient() {
             <input className="input-premium mt-1 text-sm" placeholder="Ahmed Al-Rashidi" value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} /></div>
           <div><label className="text-xs font-bold uppercase text-muted">Email</label>
             <input type="email" className="input-premium mt-1 text-sm" placeholder="user@company.local" value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} /></div>
-          <div><label className="text-xs font-bold uppercase text-muted">Role</label>
-            <select className="input-premium mt-1 text-sm" value={addForm.role} onChange={(e) => setAddForm({ ...addForm, role: e.target.value })}>
-              {ROLE_ORDER.map((r) => (<option key={r} value={r}>{roleLabel(r as Parameters<typeof roleLabel>[0])}</option>))}
-            </select></div>
+          <div>
+            <label className="text-xs font-bold uppercase text-muted">Roles (multi-select)</label>
+            <div className="mt-1.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {ROLE_ORDER.map((r) => {
+                const on = addForm.roles.includes(r as Role);
+                return (
+                  <button key={r} type="button" onClick={() => toggleAddRole(r as Role)}
+                    className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-bold transition ${
+                      on ? "border-blue-500 bg-blue-50 text-blue-800 ring-2 ring-blue-500/20" : "border-line bg-white text-slate-600 hover:border-blue-300 hover:bg-slate-50"
+                    }`}>
+                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${on ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white"}`}>
+                      {on && <span className="text-[10px] leading-none">✓</span>}
+                    </span>
+                    {roleLabel(r as Parameters<typeof roleLabel>[0])}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-[11px] text-muted">Pick one or more — the user can combine roles (e.g. Dispatcher + Delivery Receiver).</p>
+          </div>
           <div><label className="text-xs font-bold uppercase text-muted">Password</label>
             <input type="password" className="input-premium mt-1 text-sm" placeholder="Minimum 8 characters" value={addForm.password} onChange={(e) => setAddForm({ ...addForm, password: e.target.value })} /></div>
           <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row">
@@ -311,10 +354,26 @@ export function UsersPageClient() {
         <div className="space-y-3">
           <div><label className="text-xs font-bold uppercase text-muted">Full Name</label>
             <input className="input-premium mt-1 text-sm" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} /></div>
-          <div><label className="text-xs font-bold uppercase text-muted">Role</label>
-            <select className="input-premium mt-1 text-sm" value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
-              {ROLE_ORDER.map((r) => (<option key={r} value={r}>{roleLabel(r as Parameters<typeof roleLabel>[0])}</option>))}
-            </select></div>
+          <div>
+            <label className="text-xs font-bold uppercase text-muted">Roles (multi-select)</label>
+            <div className="mt-1.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {ROLE_ORDER.map((r) => {
+                const on = editForm.roles.includes(r as Role);
+                return (
+                  <button key={r} type="button" onClick={() => toggleEditRole(r as Role)}
+                    className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-left text-xs font-bold transition ${
+                      on ? "border-blue-500 bg-blue-50 text-blue-800 ring-2 ring-blue-500/20" : "border-line bg-white text-slate-600 hover:border-blue-300 hover:bg-slate-50"
+                    }`}>
+                    <span className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${on ? "border-blue-600 bg-blue-600 text-white" : "border-slate-300 bg-white"}`}>
+                      {on && <span className="text-[10px] leading-none">✓</span>}
+                    </span>
+                    {roleLabel(r as Parameters<typeof roleLabel>[0])}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-[11px] text-muted">Pick one or more — the user can combine roles.</p>
+          </div>
           <div><label className="text-xs font-bold uppercase text-muted">New Password <span className="font-normal">(leave blank to keep)</span></label>
             <input type="password" className="input-premium mt-1 text-sm" placeholder="Leave blank to keep current" value={editForm.password} onChange={(e) => setEditForm({ ...editForm, password: e.target.value })} /></div>
           <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row">

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PalletTrack Pro — Client Demo Guide</title>
+  <style>
+    :root {
+      --navy: #0b1524;
+      --navy2: #152844;
+      --blue: #1e40af;
+      --sky: #0ea5e9;
+      --emerald: #059669;
+      --violet: #7c3aed;
+      --amber: #d97706;
+      --red: #dc2626;
+      --orange: #ea580c;
+      --slate: #64748b;
+      --line: #e2e8f0;
+      --surface: #f8fafc;
+      --ink: #1e293b;
+      --muted: #475569;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f4f8;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ───────────── COVER ───────────── */
+    .cover {
+      background: linear-gradient(135deg, #0b1524 0%, #152844 45%, #1e40af 100%);
+      color: white;
+      padding: 56px 32px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .cover::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 55% 45% at 15% 0%, rgba(14,165,233,0.25) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 90% 100%, rgba(124,58,237,0.2) 0%, transparent 60%);
+    }
+    .cover > * { position: relative; }
+    .cover-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #7dd3fc; margin-bottom: 26px;
+    }
+    .cover-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: #34d399; box-shadow: 0 0 0 4px rgba(52,211,153,0.25); }
+    .cover h1 { font-size: 44px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 10px; }
+    .cover h1 span { background: linear-gradient(90deg, #7dd3fc, #a5b4fc); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .cover .lead { font-size: 17px; color: rgba(255,255,255,0.8); max-width: 640px; margin: 0 auto 8px; }
+    .cover .sub  { font-size: 13px; color: rgba(255,255,255,0.55); max-width: 560px; margin: 0 auto 30px; }
+    .cover-meta {
+      display: flex; gap: 26px; justify-content: center; flex-wrap: wrap;
+      font-size: 12px; color: rgba(255,255,255,0.6);
+    }
+    .cover-meta span { display: flex; align-items: center; gap: 6px; }
+
+    .container { max-width: 980px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    /* ───────────── CARDS ───────────── */
+    .card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px 28px;
+      margin-bottom: 26px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+    }
+    .card h2 {
+      font-size: 17px; font-weight: 800; color: var(--navy);
+      display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+    }
+    .card h2 .ico {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .card > p.tag { font-size: 12px; color: var(--slate); margin-bottom: 14px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    @media (max-width: 780px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    /* ───────────── FLOW DIAGRAM ───────────── */
+    .flow {
+      display: flex; align-items: stretch; justify-content: center;
+      flex-wrap: wrap; gap: 6px; margin: 18px 0 8px;
+    }
+    .flow-node {
+      background: var(--surface);
+      border: 1.5px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: center;
+      min-width: 96px;
+    }
+    .flow-node .fi { font-size: 20px; display: block; margin-bottom: 4px; }
+    .flow-node .ft { font-size: 11px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: 0.4px; }
+    .flow-node.done  { border-color: #a7f3d0; background: #ecfdf5; }
+    .flow-node.active{ border-color: #93c5fd; background: #eff6ff; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+    .flow-node.warn  { border-color: #fcd34d; background: #fffbeb; }
+    .flow-node.bad   { border-color: #fca5a5; background: #fef2f2; }
+    .flow-arrow { display: flex; align-items: center; color: #94a3b8; font-size: 15px; font-weight: 700; }
+
+    /* ───────────── STEPS ───────────── */
+    .step { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px dashed var(--line); }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), var(--sky));
+      color: white; font-size: 13px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .step-body h3 { font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 3px; }
+    .step-body p  { font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+    .step-body .click {
+      display: inline-block;
+      background: #1e293b; color: #7dd3fc;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px; font-weight: 600;
+      padding: 2px 9px; border-radius: 6px;
+      margin: 2px 2px 2px 0;
+    }
+    .step-body .say {
+      display: block; margin-top: 6px;
+      background: #f0f9ff; border-left: 3px solid var(--sky);
+      border-radius: 8px; padding: 8px 12px;
+      font-size: 13px; color: #075985; font-style: italic;
+    }
+    .step-body .expect {
+      display: block; margin-top: 6px;
+      background: #f0fdf4; border-left: 3px solid var(--emerald);
+      border-radius: 8px; padding: 8px 12px;
+      font-size: 12.5px; color: #14532d;
+    }
+    .step-body .expect b { color: #065f46; }
+
+    /* ───────────── BADGES / CHIPS ───────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 11px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge.emerald { background: #d1fae5; color: #065f46; }
+    .badge.sky     { background: #e0f2fe; color: #075985; }
+    .badge.violet  { background: #ede9fe; color: #4c1d95; }
+    .badge.blue    { background: #dbeafe; color: #1e40af; }
+    .badge.amber   { background: #fef3c7; color: #92400e; }
+    .badge.red     { background: #fee2e2; color: #991b1b; }
+    .badge.orange  { background: #ffedd5; color: #9a3412; }
+    .badge.slate   { background: #f1f5f9; color: #475569; }
+    .badge.gradient{ background: linear-gradient(135deg,#1e40af,#0ea5e9); color: white; }
+
+    /* ───────────── CALLOUTS ───────────── */
+    .callout {
+      border-radius: 12px; padding: 14px 16px;
+      font-size: 13px; margin: 14px 0;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .callout.info   { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; }
+    .callout.tip    { background: #f0fdf4; border: 1px solid #bbf7d0; color: #14532d; }
+    .callout.warn   { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+    .callout.danger { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .callout .ci { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+    .callout b { font-weight: 800; }
+
+    /* ───────────── TABLES ───────────── */
+    table.dt { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 10px; }
+    table.dt th {
+      background: var(--surface); font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.5px; font-size: 10.5px; color: var(--slate);
+      padding: 9px 12px; text-align: left; border: 1px solid var(--line);
+    }
+    table.dt td { padding: 9px 12px; border: 1px solid var(--line); vertical-align: top; }
+    table.dt tr:nth-child(even) td { background: #fafafa; }
+    .mono { font-family: 'Consolas','Courier New',monospace; font-size: 12px; background: #f1f5f9; padding: 1px 6px; border-radius: 5px; }
+
+    /* ───────────── MISC ───────────── */
+    .kpi { text-align: center; padding: 18px 12px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+    .kpi .knum { font-size: 26px; font-weight: 900; color: var(--navy); }
+    .kpi .klbl { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--slate); margin-top: 2px; }
+    .kpi.blue { background: #eff6ff; border-color: #bfdbfe; } .kpi.blue .knum { color: #1e40af; }
+    .kpi.green{ background: #ecfdf5; border-color: #a7f3d0; } .kpi.green .knum { color: #065f46; }
+    .kpi.amber{ background: #fffbeb; border-color: #fde68a; } .kpi.amber .knum { color: #92400e; }
+    .kpi.red  { background: #fef2f2; border-color: #fecaca; } .kpi.red .knum { color: #991b1b; }
+
+    .divider { text-align: center; margin: 34px 0 26px; position: relative; }
+    .divider::before { content: ''; position: absolute; left: 0; right: 0; top: 50%; border-top: 1px dashed #cbd5e1; }
+    .divider span {
+      position: relative; background: #f0f4f8; padding: 0 18px;
+      font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--slate);
+    }
+
+    .section-title { font-size: 22px; font-weight: 900; color: var(--navy); margin: 8px 0 2px; letter-spacing: -0.4px; }
+    .section-desc { font-size: 13.5px; color: var(--slate); margin-bottom: 18px; }
+
+    ul.clean { margin: 6px 0 6px 20px; }
+    ul.clean li { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    ul.clean li b { color: var(--navy); }
+
+    .footer {
+      text-align: center; padding: 30px 20px 40px;
+      color: #94a3b8; font-size: 12px;
+    }
+    .footer b { color: var(--slate); }
+
+    .phase-tab {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: linear-gradient(135deg, #1e40af, #0ea5e9);
+      color: white; font-size: 11px; font-weight: 800;
+      padding: 4px 13px; border-radius: 999px;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;
+    }
+
+    @media print {
+      body { background: white; }
+      .cover { padding: 30px 20px; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .container { max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════ COVER ═══════════════════════════ -->
+  <div class="cover">
+    <div class="cover-badge"><span class="dot"></span> Live Demo Script · Trainer's Edition</div>
+    <h1>PalletTrack <span>Pro</span></h1>
+    <p class="lead">Complete Client Demonstration Guide</p>
+    <p class="sub">A simple, visual, click-by-click script to show your client the full pallet tracking system — from factory registration to delivery, returns, damage repair, and reporting.</p>
+    <div class="cover-meta">
+      <span>⏱ 25–35 minutes</span>
+      <span>👥 1 Trainer + Client</span>
+      <span>💻 Live App on localhost:3001</span>
+      <span>📊 Real Demo Data Included</span>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ═══════════════════════════ HOW TO USE ═══════════════════════════ -->
+    <div class="card">
+      <h2><span class="ico" style="background:#eff6ff">🎯</span> How to Use This Guide</h2>
+      <p class="tag">Read this page first — it takes 2 minutes and makes the demo flawless.</p>
+      <div class="grid-3">
+        <div class="kpi green"><div class="knum">3</div><div class="klbl">Demo Parts</div></div>
+        <div class="kpi blue"><div class="knum">1</div><div class="klbl">Live App</div></div>
+        <div class="kpi amber"><div class="knum">2</div><div class="klbl">Logins Used</div></div>
+      </div>
+      <ul class="clean" style="margin-top:16px">
+        <li><b>Part A – Admin</b> shows the full pallet lifecycle (single scan + batch scan), damage &amp; repair, and reports. This is the heart of the demo.</li>
+        <li><b>Part B – Multi-Role User</b> shows the client that one person can combine roles (e.g. dispatcher + delivery receiver + return collector).</li>
+        <li><b>Part C – Q&amp;A</b> is a cheat-sheet of the questions clients usually ask, with ready answers.</li>
+        <li>Each step shows the <span class="mono">exact clicks</span> in dark blue, what to <i>say</i> to the client in a light blue box, and the <b>expected result</b> in a green box.</li>
+        <li>If anything looks different from the guide, follow the <b>Troubleshooting</b> section at the end — don't stop the demo.</li>
+      </ul>
+      <div class="callout tip"><span class="ci">💡</span><div><b>Trainer tip:</b> The app is already filled with realistic demo data (pallets, trucks, drivers, past trips). You don't need to create anything to start — but Part A shows you how to create a fresh pallet live, which impresses clients the most.</div></div>
+    </div>
+
+    <!-- ═══════════════════════════ DEMO DATA ═══════════════════════════ -->
+    <div class="card">
+      <h2><span class="ico" style="background:#f0fdf4">🗝️</span> Demo Accounts &amp; Test Data</h2>
+      <p class="tag">Use these exact logins. Keep this page open in a second tab.</p>
+      <table class="dt">
+        <tr><th>Role</th><th>Email</th><th>Password</th><th>What it proves</th></tr>
+        <tr>
+          <td><span class="badge gradient">Administrator</span></td>
+          <td class="mono">admin@pallettrack.local</td>
+          <td class="mono">password123</td>
+          <td>Full lifecycle, batch scan, reports, settings</td>
+        </tr>
+        <tr>
+          <td><span class="badge violet">Multi-Role User</span></td>
+          <td class="mono">multirole@pallettrack.local</td>
+          <td class="mono">password123</td>
+          <td>Dispatcher + Delivery Receiver + Return Collector + Factory Receiver in one account</td>
+        </tr>
+      </table>
+
+      <table class="dt" style="margin-top:16px">
+        <tr><th>Demo Pallet</th><th>Status in app</th><th>Use for…</th></tr>
+        <tr><td class="mono">DEMO-PLT-001</td><td><span class="badge emerald">Available</span></td><td>Walk a pallet through the full single-scan cycle live</td></tr>
+        <tr><td class="mono">TEST-PLT-001</td><td><span class="badge emerald">Available</span></td><td>Batch scanning (already did 2 trips)</td></tr>
+        <tr><td class="mono">PT-MS26RRQTOQJG</td><td><span class="badge emerald">Available</span></td><td>Batch scanning (already did 2 trips)</td></tr>
+        <tr><td class="mono">PT-MS0OX7QT0FXG</td><td><span class="badge emerald">Available</span></td><td>Damage &amp; repair story (2 resolved damage records)</td></tr>
+      </table>
+
+      <table class="dt" style="margin-top:16px">
+        <tr><th>Fleet</th><th>Detail</th></tr>
+        <tr><td>Driver <b>Faisal</b></td><td>Phone <span class="mono">+968 9530 5730</span> · Truck <span class="mono">Y-5796</span> · 1 trip / 7 dispatches / 7 deliveries</td></tr>
+        <tr><td>Driver <b>Usman Wazir</b></td><td>Phone <span class="mono">+968 9233 1373</span> · Truck <span class="mono">UU-123456</span> · 1 trip / 1 dispatch / 1 delivery</td></tr>
+      </table>
+      <div class="callout info"><span class="ci">ℹ️</span><div><b>Tip:</b> Scan a pallet anytime from the <b>Scan</b> page — the app accepts manual typing of the pallet number, so you don't need a physical QR scanner for the demo.</div></div>
+    </div>
+
+    <!-- ═══════════════════════════ LIFECYCLE ═══════════════════════════ -->
+    <div class="card">
+      <h2><span class="ico" style="background:#fef3c7">🔄</span> The Pallet Lifecycle — One Picture</h2>
+      <p class="tag">Show this to the client first. It takes 30 seconds and frames the whole demo.</p>
+      <div class="flow">
+        <div class="flow-node done"><span class="fi">🏭</span><span class="ft">Available</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><span class="fi">📦</span><span class="ft">Loaded</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><span class="fi">🚛</span><span class="ft">In Transit</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><span class="fi">🤝</span><span class="ft">Delivered</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><span class="fi">↩️</span><span class="ft">Returning</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node done"><span class="fi">🏭</span><span class="ft">Available</span></div>
+      </div>
+      <div class="flow">
+        <div class="flow-node warn"><span class="fi">⚠️</span><span class="ft">Damaged</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node active"><span class="fi">🔧</span><span class="ft">Under Repair</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node done"><span class="fi">✅</span><span class="ft">Available</span></div>
+        <div class="flow-arrow" style="margin-left:14px">·</div>
+        <div class="flow-node bad"><span class="fi">❌</span><span class="ft">Lost / Retired</span></div>
+      </div>
+      <p style="font-size:12.5px; color:var(--slate); margin-top:10px">
+        Every arrow is a <b>scanned action</b> by a named user and leaves a timestamped record. A "trip" is counted each time a pallet goes out and comes back. Everything flows back to <b>Available</b> at the factory, so the same pallet is reused for years.
+      </p>
+    </div>
+
+    <div class="divider"><span>Part A · Admin — Full Lifecycle</span></div>
+
+    <!-- ═══════════════════════════ A1 LOGIN ═══════════════════════════ -->
+    <div class="card">
+      <div class="phase-tab">A1 · 2 min</div>
+      <h2>👋 Login as Administrator</h2>
+      <p class="tag">Open the app and sign in with the admin account.</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Open the app</h3>
+          <p>Open the browser and go to <span class="mono">http://localhost:3001</span></p>
+          <span class="say">"This is PalletTrack Pro — the complete pallet tracking system for water companies."</span>
+          <span class="expect"><b>Expect:</b> The login screen appears.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Sign in</h3>
+          <p>Enter <span class="click">admin@pallettrack.local</span> and <span class="click">password123</span>, then click <span class="click">Sign in</span>.</p>
+          <span class="say">"Every user signs in with their own account. Every action is recorded against their name — full accountability."</span>
+          <span class="expect"><b>Expect:</b> Dashboard opens showing live counts (pallets, trucks, drivers, trips).</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════ A2 REGISTER ═══════════════════════════ -->
+    <div class="card">
+      <div class="phase-tab">A2 · 3 min</div>
+      <h2>🏭 Register a New Pallet (Factory)</h2>
+      <p class="tag">Creating a pallet live is the strongest opening move — it shows the system is real, not a mock-up.</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Open the Register page</h3>
+          <p>Click <span class="click">Register Pallet</span> in the left menu.</p>
+          <span class="expect"><b>Expect:</b> A registration form with material, dimensions, capacity, cost and a live QR preview.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Fill the form</h3>
+          <p>Enter a memorable number such as <span class="click">DEMO-PLT-002</span> (or any number you like), choose <span class="click">Wood</span>, dimensions <span class="click">1200×800×150</span>, capacity <span class="click">1000 kg</span>, cost <span class="click">15</span>, and pick today's date.</p>
+          <span class="say">"Each pallet gets a unique number and a QR code. When the client's staff scan it with any phone, they instantly see where the pallet is."</span>
+          <span class="expect"><b>Expect:</b> A QR code preview appears with the pallet number under it.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Save the pallet</h3>
+          <p>Click <span class="click">Register Pallet</span> to save.</p>
+          <span class="expect"><b>Expect:</b> A success confirmation with the QR code, and a "Print label" option. Click <b>Print label</b> to show the printable tag with QR — great for factory staff.</span>
+        </div>
+      </div>
+      <div class="callout tip"><span class="ci">💡</span><div><b>Trainer tip:</b> Mention that labels can be printed and stuck on pallets. Staff just scan to move pallets — no paperwork, no typing.</div></div>
+    </div>
+
+    <!-- ═══════════════════════════ A3 SINGLE SCAN CYCLE ═══════════════════════════ -->
+    <div class="card">
+      <div class="phase-tab">A3 · 8 min</div>
+      <h2>📦 Full Cycle via Single Scan</h2>
+      <p class="tag">The most important part of the demo. Walk one pallet from warehouse to customer and back, scanning at every step.</p>
+      <div class="callout info"><span class="ci">ℹ️</span><div>Use the pallet you just created (<span class="mono">DEMO-PLT-002</span>) — or reuse <span class="mono">DEMO-PLT-001</span> from the demo data.</div></div>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Warehouse — Load products</h3>
+          <p>Click <span class="click">Scan</span> in the menu. Type the pallet number into the scan box and click the search button.</p>
+          <span class="expect"><b>Expect:</b> The pallet is found — status <b>Available</b>, next action <b>Load Products</b>.</span>
+          <p>Add a product line (e.g. product <span class="click">Water 5L</span>, qty <span class="click">40</span>), then click <span class="click">Mark as Loaded</span>.</p>
+          <span class="say">"The warehouse team scans the pallet and loads it with products. The system remembers exactly what's on each pallet."</span>
+          <span class="expect"><b>Expect:</b> Status changes to <b>Loaded</b>.</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Dispatcher — Send it out</h3>
+          <p>On the same Scan page (or the <span class="click">Dispatch</span> page), scan the same pallet again. Fill the dispatch form: truck <span class="click">Y-5796</span>, driver <span class="click">Faisal</span>, destination <span class="click">AL-NAHDA STORE</span>.</p>
+          <span class="say">"Now the dispatcher assigns the pallet to a specific truck and driver and sends it to a customer. This creates a trip."</span>
+          <span class="expect"><b>Expect:</b> Status changes to <b>In Transit</b> with the truck, driver and destination shown.</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Delivery — Customer confirms</h3>
+          <p>Scan the pallet again, enter the receiver's name in the delivery form, and confirm.</p>
+          <span class="say">"The customer's delivery receiver confirms receipt with their own name. That's proof of delivery — no more disputes."</span>
+          <span class="expect"><b>Expect:</b> Status changes to <b>Delivered</b>.</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Return pickup — Collector</h3>
+          <p>Scan the same pallet again. The return form shows <b>Collector</b> automatically filled with the logged-in user.</p>
+          <span class="say">"When the truck visits the customer to collect the empty pallet, the collector's name is filled automatically. They scan once — the pallet starts coming home."</span>
+          <span class="expect"><b>Expect:</b> Status changes to <b>Returning</b>.</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Factory receive — Inspector</h3>
+          <p>Scan the same pallet once more. The form shows <b>Inspector</b> pre-filled. Confirm to receive it back.</p>
+          <span class="say">"Back at the factory, the inspector receives the pallet. It's now available for the next trip — ready to be reused."</span>
+          <span class="expect"><b>Expect:</b> Status returns to <b>Available</b>. The trip is counted.</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h3>Show the full history</h3>
+          <p>Click <span class="click">Pallets</span>, then click the pallet number to open its profile.</p>
+          <span class="say">"Every single scan is on the timeline — who did what, when, and with what note. This pallet's whole journey is 100% traceable."</span>
+          <span class="expect"><b>Expect:</b> The 360° profile shows the movement timeline (Load → Dispatch → Deliver → Return Pickup → Factory Receive), trip count = 1, and the QR code.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════ A4 BATCH SCAN ═══════════════════════════ -->
+    <div class="card">
+      <div class="phase-tab">A4 · 8 min</div>
+      <h2>📚 Batch Scanning (Trips) — Multiple Pallets, One Truck</h2>
+      <p class="tag">Show that the client doesn't scan pallets one-by-one for dispatch: they create ONE trip and scan many pallets onto it.</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Open Batch Scan</h3>
+          <p>Click <span class="click">Batch Scan</span> in the menu.</p>
+          <span class="say">"For dispatches with many pallets, we create one trip — one truck, one driver, one destination — then scan pallets onto it one after another. One trip, many pallets."</span>
+          <span class="expect"><b>Expect:</b> The batch scan page with a list of trips and a <b>New Trip</b> button.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Create a Dispatch Trip</h3>
+          <p>Click <span class="click">New Trip</span>, choose <span class="click">Dispatch Trip</span>, pick truck <span class="click">UU-123456</span>, driver <span class="click">Usman Wazir</span>, destination <span class="click">AL-NAHDA STORE</span>, then <span class="click">Start Trip</span>.</p>
+          <span class="expect"><b>Expect:</b> The trip opens with truck/driver/destination locked in the header, and a scan box to add pallets.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Scan pallets onto the trip</h3>
+          <p>Scan <span class="click">TEST-PLT-001</span>, then <span class="click">PT-MS26RRQTOQJG</span>, then your new <span class="click">DEMO-PLT-002</span> (if it's Available).</p>
+          <span class="say">"Each pallet is added to the same manifest. The counter shows '3 scanned'. Truck and driver are entered only once — huge time saving for busy dispatchers."</span>
+          <span class="expect"><b>Expect:</b> Manifest count increments; each pallet's status flips from Available to In Transit.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Close the trip</h3>
+          <p>Click <span class="click">Complete Trip</span>.</p>
+          <span class="say">"The trip is closed — the whole batch is out for delivery under one driver."</span>
+          <span class="expect"><b>Expect:</b> Trip status becomes Closed with the final manifest count.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Return collection batch</h3>
+          <p>Create a new trip, choose <span class="click">Return Collection</span>. Notice <b>Collector</b> is pre-filled with your name.</p>
+          <span class="say">"On the return side it works the same way: the collector creates one return trip and scans all the empty pallets being picked up from customers."</span>
+          <span class="expect"><b>Expect:</b> Return Collection trip opens with Collector pre-filled; scanning delivered pallets moves them to <b>Returning</b>.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h3>Factory receive batch</h3>
+          <p>Create a third trip, choose <span class="click">Factory Receive</span> — <b>Inspector</b> is pre-filled. Scan the returning pallets, then complete the trip.</p>
+          <span class="say">"At the factory, the inspector receives the whole batch back in one go. Everything is available again for the next trip."</span>
+          <span class="expect"><b>Expect:</b> All scanned pallets return to <b>Available</b>, and each pallet's trip count increases.</span>
+        </div>
+      </div>
+      <div class="callout tip"><span class="ci">💡</span><div><b>Client hook:</b> Ask "How many pallets do you send per day?" — then say "With batch scanning, one person can dispatch a hundred pallets in minutes."</div></div>
+    </div>
+
+    <!-- ═══════════════════════════ A5 DAMAGE & REPAIR ═══════════════════════════ -->
+    <div class="card">
+      <div class="phase-tab">A5 · 5 min</div>
+      <h2>🔧 Damaged &amp; Repair Flow</h2>
+      <p class="tag">Show that damaged pallets are tracked until they're fixed — nothing slips through the cracks.</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Open a damaged pallet's history</h3>
+          <p>Click <span class="click">Pallets</span> and open <span class="mono">PT-MS0OX7QT0FXG</span>.</p>
+          <span class="say">"This pallet was damaged twice. Each damage was recorded with a description, photo, and who reported it — and both were repaired."</span>
+          <span class="expect"><b>Expect:</b> Damage History shows 2 records, both marked <b>Resolved</b>, and the timeline shows Begin Repair → Complete Repair.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Demo: damage a pallet live</h3>
+          <p>Use the pallet you just cycled (<span class="mono">DEMO-PLT-002</span>, currently Available). Scan it, and choose the damage action. Enter a description like <span class="click">Cracked corner on base</span> and confirm.</p>
+          <span class="expect"><b>Expect:</b> Status becomes <b>Damaged</b> and a damage record is created.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Begin repair → complete repair</h3>
+          <p>From the pallet profile, click <span class="click">Begin Repair</span> (add a note), then <span class="click">Complete Repair</span> (add a note).</p>
+          <span class="say">"Repair work is tracked with notes and the damage records are automatically marked resolved. The pallet comes back to Available for reuse."</span>
+          <span class="expect"><b>Expect:</b> Status returns to <b>Available</b>, damage record shows <b>Resolved</b>, timeline shows the full repair history.</span>
+        </div>
+      </div>
+      <div class="callout warn"><span class="ci">⚠️</span><div><b>Also show:</b> from a Damaged pallet you can also <b>Retire Pallet</b> — important for pallets that are beyond repair. Lost pallets are handled the same way.</div></div>
+    </div>
+
+    <!-- ═══════════════════════════ A6 REPORTS ═══════════════════════════ -->
+    <div class="card">
+      <div class="phase-tab">A6 · 5 min</div>
+      <h2>📊 Reports &amp; Business Insights</h2>
+      <p class="tag">Clients love this part — it turns scanning data into management decisions.</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Open Reports</h3>
+          <p>Click <span class="click">Reports</span> in the menu.</p>
+          <span class="expect"><b>Expect:</b> 12 reports listed (movement, weekly/monthly summaries, driver performance, damaged, lost, utilization, returns…).</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Driver Performance</h3>
+          <p>Click <span class="click">Run Report</span> on <b>Driver Performance</b>.</p>
+          <span class="say">"Every trip is credited to a driver. The numbers here are from before our demo — Faisal: 7 dispatches, 7 deliveries; Usman Wazir: 1 and 1. Watch these grow as we keep scanning."</span>
+          <span class="expect"><b>Expect:</b> Table with drivers, phone, trips, dispatches, deliveries — plus whatever the trainer just dispatched (numbers increase live). Export CSV available.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Pallet Utilization</h3>
+          <p>Close the report, then <span class="click">Run Report</span> on <b>Pallet Utilization</b>.</p>
+          <span class="say">"This tells you how many trips each pallet has done — so you know which pallets to replace and how long each pallet lasts."</span>
+          <span class="expect"><b>Expect:</b> Per-pallet trip counts (e.g. TEST-PLT-001: 2 trips) with days active and trips/month.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Damaged Pallets report</h3>
+          <p><span class="click">Run Report</span> on <b>Damaged Pallets</b>.</p>
+          <span class="say">"A full register of every damage record with description, reporter, and resolution status. This is your maintenance report for the repair team."</span>
+          <span class="expect"><b>Expect:</b> Damage records table — the ones we just created appear here.</span>
+        </div>
+      </div>
+      <div class="callout info"><span class="ci">ℹ️</span><div><b>Mention:</b> all reports can be exported to CSV for Excel, and filtered by date range.</div></div>
+    </div>
+
+    <div class="divider"><span>Part B · Multi-Role User</span></div>
+
+    <!-- ═══════════════════════════ B MULTI-ROLE ═══════════════════════════ -->
+    <div class="card">
+      <div class="phase-tab">B · 5 min</div>
+      <h2>👥 One User, Multiple Roles</h2>
+      <p class="tag">Answer the client's most common question: "Our same salesman is dispatcher AND receiver — is that okay?"</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Log out</h3>
+          <p>Click your avatar (top-right) and choose <span class="click">Sign out</span>.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Sign in as the multi-role user</h3>
+          <p>Use <span class="mono">multirole@pallettrack.local</span> / <span class="mono">password123</span>.</p>
+          <span class="say">"This user was given four roles in one account: Dispatcher, Delivery Receiver, Return Collector, and Factory Receiver. Small teams can combine roles — no need for a separate login per job."</span>
+          <span class="expect"><b>Expect:</b> The left menu shows Pallets, Scan, Batch Scan, Dispatch, Fleet — everything this person needs, and no admin pages.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Show the combined capability</h3>
+          <p>Open <span class="click">Batch Scan → New Trip</span>.</p>
+          <span class="say">"Because this user has all four roles, they can create Dispatch Trips, Return Collections, AND Factory Receives. The same person can send pallets out and collect them back."</span>
+          <span class="expect"><b>Expect:</b> All three trip types are available in the New Trip dialog.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>How the admin grants roles</h3>
+          <p>Sign back in as <span class="mono">admin@pallettrack.local</span>, go to <span class="click">Users</span>, and open any user to edit.</p>
+          <span class="say">"The admin simply ticks the roles each person needs. Multi-select, saved instantly — every role change is audited."</span>
+          <span class="expect"><b>Expect:</b> The edit dialog shows all 8 roles as checkboxes with the message "Pick one or more — the user can combine roles."</span>
+        </div>
+      </div>
+      <div class="callout warn"><span class="ci">⚠️</span><div><b>Honest note for the client:</b> combining roles is fully supported, but for bigger companies, keeping roles separate is better practice for control (auditors like "one person can't do everything"). The system supports both styles.</div></div>
+    </div>
+
+    <!-- ═══════════════════════════ C Q&A ═══════════════════════════ -->
+    <div class="divider"><span>Part C · Client Q&amp;A Cheat-Sheet</span></div>
+
+    <div class="card">
+      <div class="phase-tab">C · Ready Answers</div>
+      <h2>❓ Questions Clients Usually Ask</h2>
+      <p class="tag">Confident answers — all of these are implemented and working in the live app.</p>
+      <table class="dt">
+        <tr><th style="width:40%">Client question</th><th>Answer you give</th></tr>
+        <tr>
+          <td><b>"Can we change the pallet status labels?"</b></td>
+          <td>"Yes — the admin can rename statuses and even add new ones from <b>Settings → Status Labels</b>. The new labels appear everywhere across the pallet's whole lifecycle automatically."</td>
+        </tr>
+        <tr>
+          <td><b>"Can the same person dispatch AND receive deliveries?"</b></td>
+          <td>"Yes. One user can be granted several roles — e.g. Dispatcher + Delivery Receiver + Return Collector. You saw it live in Part B."</td>
+        </tr>
+        <tr>
+          <td><b>"Is the truck &amp; driver module fully working — add, edit, delete?"</b></td>
+          <td>"Yes — full CRUD from the <b>Fleet</b> page: add trucks and drivers, edit details, and delete unused ones. Dispatches link to real fleet records, so reports merge everything under the driver's name."</td>
+        </tr>
+        <tr>
+          <td><b>"Can we send many pallets with one truck, not one pallet at a time?"</b></td>
+          <td>"Absolutely — that's <b>Batch Scanning</b> (Part A4). Create one trip with the truck/driver/destination, then scan as many pallets as you want onto it."</td>
+        </tr>
+        <tr>
+          <td><b>"On returns, can the collector and inspector be the logged-in user automatically?"</b></td>
+          <td>"Yes — on the return flow, the <b>Collector</b> name and the factory <b>Inspector</b> name are pre-filled from the logged-in user, once, and you can scan many pallets after that."</td>
+        </tr>
+        <tr>
+          <td><b>"Do we get proof of delivery?"</b></td>
+          <td>"Yes — the delivery receiver confirms with their name, and it's recorded on the pallet timeline with date &amp; time. You can pull it up any time."</td>
+        </tr>
+        <tr>
+          <td><b>"What if a pallet is damaged or lost?"</b></td>
+          <td>"Damage is recorded with description + photo and goes through a repair workflow (Begin Repair → Complete Repair) with full history. Lost pallets are flagged and appear in the Lost Pallets report."</td>
+        </tr>
+        <tr>
+          <td><b>"How do we know how our drivers perform?"</b></td>
+          <td>"The <b>Driver Performance</b> report shows trips, dispatches and deliveries per driver. You also get utilization and return-performance reports — all exportable to Excel."</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- ═══════════════════════════ TROUBLESHOOTING ═══════════════════════════ -->
+    <div class="card">
+      <h2>🛟 Troubleshooting &amp; Preparation Checklist</h2>
+      <p class="tag">Do this BEFORE the client arrives. 5 minutes.</p>
+      <ul class="clean">
+        <li><b>App is running:</b> confirm <span class="mono">http://localhost:3001</span> loads in the browser.</li>
+        <li><b>Both logins work:</b> admin + multirole (password <span class="mono">password123</span>).</li>
+        <li><b>Demo pallets exist:</b> <span class="mono">DEMO-PLT-001</span>, <span class="mono">TEST-PLT-001</span>, <span class="mono">PT-MS26RRQTOQJG</span> are Available.</li>
+        <li><b>Fleet exists:</b> trucks <span class="mono">Y-5796</span> &amp; <span class="mono">UU-123456</span>, drivers Faisal &amp; Usman Wazir.</li>
+        <li><b>Close the QR/print dialogs</b> before scanning the next pallet.</li>
+        <li><b>If a scan "does nothing":</b> the pallet may need a product line before Load, or the form may have a required field — read the on-screen message.</li>
+        <li><b>If a pallet can't be scanned:</b> check its status — e.g. a Delivered pallet can only be Return-picked, not loaded. That's the lifecycle working correctly.</li>
+      </ul>
+      <div class="callout danger"><span class="ci">⛔</span><div><b>If something really breaks:</b> don't improvise in front of the client — move to the next section of the demo and check the issue afterwards. The pallet you create today stays in the system and can be reused.</div></div>
+    </div>
+
+    <!-- ═══════════════════════════ VERSION / FOOTER ═══════════════════════════ -->
+    <div class="footer">
+      <b>PalletTrack Pro — Client Demo Guide</b> · v1.0 · For trainer use with the live app<br/>
+      Built from a fully tested end-to-end walkthrough (single-scan cycle, batch trips, damage &amp; repair, multi-role users, reports) — verified against real data on 31 Jul 2026.
+    </div>
+
+  </div>
+</body>
+</html>

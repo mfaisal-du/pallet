@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { safeAuth } from "@/lib/safe-auth";
 import { prisma } from "@/lib/db";
+import { getStatusLabels, labelFor } from "@/lib/status-labels";
+import { rolesOfUser } from "@/lib/roles";
 
 // Helper to build date filter
 function dateFilter(from?: string | null, to?: string | null) {
@@ -14,10 +16,18 @@ function dateFilter(from?: string | null, to?: string | null) {
   return Object.keys(filter).length ? filter : undefined;
 }
 
+// Normalize a movement payload (JSON) into a plain object for reads.
+function payloadOf(payload: unknown): Record<string, unknown> {
+  if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+    return payload as unknown as Record<string, unknown>;
+  }
+  return {};
+}
+
 export async function GET(req: NextRequest) {
   const session = await safeAuth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!["administrator", "manager"].includes(session.user.role)) {
+  if (!rolesOfUser(session.user).some((r) => ["administrator", "manager"].includes(r))) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -26,6 +36,7 @@ export async function GET(req: NextRequest) {
   const from = searchParams.get("from");
   const to = searchParams.get("to");
   const createdFilter = dateFilter(from, to);
+  const statusLabels = await getStatusLabels(prisma);
 
   try {
     switch (type) {
@@ -45,8 +56,8 @@ export async function GET(req: NextRequest) {
           rows: movements.map((m) => ({
             "Pallet #": m.pallet.palletNumber,
             Action: m.action,
-            "From Status": m.fromStatus ?? "—",
-            "To Status": m.toStatus ?? "—",
+            "From Status": labelFor(statusLabels, m.fromStatus),
+            "To Status": labelFor(statusLabels, m.toStatus),
             User: m.user?.name ?? "System",
             "Date/Time": m.createdAt.toISOString(),
           })),
@@ -114,7 +125,7 @@ export async function GET(req: NextRequest) {
           columns: ["Pallet #", "Status", "Location", "Return Due", "Trip Count", "Last Updated"],
           rows: pallets.map((p) => ({
             "Pallet #": p.palletNumber,
-            Status: p.status,
+            Status: labelFor(statusLabels, p.status),
             Location: p.currentLocation ?? "—",
             "Return Due": p.returnDueDate?.toISOString().slice(0, 10) ?? "—",
             "Trip Count": p.tripCount,
@@ -126,24 +137,113 @@ export async function GET(req: NextRequest) {
 
       // 5 — Driver Performance Report
       case 5: {
-        const dispatches = await prisma.movement.findMany({
-          where: { action: "dispatch", ...(createdFilter ? { createdAt: createdFilter } : {}) },
-          select: { payload: true, createdAt: true },
+        // Dispatches and deliveries inside the window
+        const windowed = await prisma.movement.findMany({
+          where: {
+            action: { in: ["dispatch", "deliver"] },
+            ...(createdFilter ? { createdAt: createdFilter } : {}),
+          },
+          select: { id: true, action: true, palletId: true, createdAt: true, payload: true, tripId: true },
         });
-        const drivers: Record<string, { deliveries: number; total: number }> = {};
+        const dispatches = windowed.filter((m) => m.action === "dispatch");
+        const deliveries = windowed.filter((m) => m.action === "deliver");
+
+        // Registry of fleet drivers referenced by dispatch payload IDs
+        const linkedIds = Array.from(
+          new Set(
+            dispatches
+              .map((d) => {
+                const p = payloadOf(d.payload);
+                return typeof p.driverId === "string" ? p.driverId : "";
+              })
+              .filter(Boolean)
+          )
+        );
+        const drivers = linkedIds.length
+          ? await prisma.driver.findMany({
+              where: { id: { in: linkedIds } },
+              select: { id: true, name: true, phone: true, licenseNo: true },
+            })
+          : [];
+        const driverById = new Map(drivers.map((dr) => [dr.id, dr]));
+
+        // Key by driverId when linked, otherwise fall back to the free-text name
+        const keyFor = (p: Record<string, unknown>) => {
+          const driverId = typeof p.driverId === "string" && p.driverId ? p.driverId : null;
+          const driverName = typeof p.driverName === "string" ? p.driverName : "";
+          if (driverId) {
+            const dr = driverById.get(driverId);
+            return { key: `id:${driverId}`, name: dr?.name || driverName || "Unknown", id: driverId };
+          }
+          return { key: `name:${driverName || "Unknown"}`, name: driverName || "Unknown", id: null };
+        };
+
+        const stats = new Map<string, { name: string; id: string | null; phone: string | null; dispatches: number; deliveries: number; trips: Set<string> }>();
+        const rowFor = (p: Record<string, unknown>) => {
+          const { key, name, id } = keyFor(p);
+          if (!stats.has(key)) {
+            stats.set(key, {
+              name,
+              id,
+              phone: id ? driverById.get(id)?.phone ?? null : null,
+              dispatches: 0,
+              deliveries: 0,
+              trips: new Set<string>(),
+            });
+          }
+          return stats.get(key)!;
+        };
+
         for (const d of dispatches) {
-          const p = d.payload as Record<string, string> | null;
-          const name = p?.driverName || "Unknown";
-          drivers[name] = drivers[name] || { deliveries: 0, total: 0 };
-          drivers[name].total += 1;
-          drivers[name].deliveries += 1;
+          const row = rowFor(payloadOf(d.payload));
+          row.dispatches += 1;
+          if (d.tripId) row.trips.add(d.tripId);
         }
-        const rows = Object.entries(drivers).map(([driver, stats]) => ({
-          Driver: driver,
-          Dispatches: stats.total,
-          Deliveries: stats.deliveries,
-        }));
-        return NextResponse.json({ columns: ["Driver", "Dispatches", "Deliveries"], rows, total: rows.length });
+
+        // Attribute each delivery to the driver of that pallet's most recent
+        // dispatch. Also fetch dispatches that happened before the window so
+        // early-window deliveries are still credited to the right driver.
+        const deliveredIds = Array.from(new Set(deliveries.map((dl) => dl.palletId)));
+        const priorDispatches = deliveredIds.length
+          ? await prisma.movement.findMany({
+              where: {
+                action: "dispatch",
+                palletId: { in: deliveredIds },
+                ...(createdFilter?.lte ? { createdAt: { lte: createdFilter.lte } } : {}),
+              },
+              select: { palletId: true, createdAt: true, payload: true },
+            })
+          : [];
+        const dispatchLog = new Map<string, { createdAt: Date; payload: unknown }[]>();
+        for (const pd of [...dispatches, ...priorDispatches]) {
+          const list = dispatchLog.get(pd.palletId) || [];
+          list.push({ createdAt: pd.createdAt, payload: pd.payload });
+          dispatchLog.set(pd.palletId, list);
+        }
+        for (const dl of deliveries) {
+          // Credit the delivery to the most recent dispatch at-or-before it,
+          // so pallets completing multiple cycles in the window each count correctly.
+          const candidates = (dispatchLog.get(dl.palletId) || []).filter((pd) => pd.createdAt <= dl.createdAt);
+          if (candidates.length === 0) continue;
+          const prior = candidates.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+          rowFor(payloadOf(prior.payload)).deliveries += 1;
+        }
+
+        const rows = Array.from(stats.values())
+          .map((r) => ({
+            Driver: r.name,
+            Phone: r.phone || "—",
+            Trips: r.trips.size,
+            Dispatches: r.dispatches,
+            Deliveries: r.deliveries,
+          }))
+          .sort((a, b) => b.Dispatches - a.Dispatches);
+
+        return NextResponse.json({
+          columns: ["Driver", "Phone", "Trips", "Dispatches", "Deliveries"],
+          rows,
+          total: rows.length,
+        });
       }
 
       // 6 — Warehouse Activity Report
@@ -191,7 +291,7 @@ export async function GET(req: NextRequest) {
               : 0;
             return {
               "Pallet #": p.palletNumber,
-              Status: p.status,
+              Status: labelFor(statusLabels, p.status),
               Location: p.currentLocation ?? "—",
               "Return Due": p.returnDueDate?.toISOString().slice(0, 10) ?? "—",
               "Days Overdue": daysOverdue,
@@ -218,7 +318,7 @@ export async function GET(req: NextRequest) {
             "Pallet #": d.pallet.palletNumber,
             Description: d.description.slice(0, 80),
             "Reported By": d.reportedBy?.name ?? "Unknown",
-            Status: d.pallet.status,
+            Status: labelFor(statusLabels, d.pallet.status),
             Resolved: d.resolved ? "Yes" : "No",
             Date: d.createdAt.toISOString(),
           })),
@@ -268,7 +368,7 @@ export async function GET(req: NextRequest) {
           columns: ["Pallet #", "Status", "Material", "Location", "Trip Count", "Registered"],
           rows: pallets.map((p) => ({
             "Pallet #": p.palletNumber,
-            Status: p.status,
+            Status: labelFor(statusLabels, p.status),
             Material: p.materialType,
             Location: p.currentLocation ?? "—",
             "Trip Count": p.tripCount,
@@ -299,7 +399,7 @@ export async function GET(req: NextRequest) {
             const tripsPerMonth = ((p.tripCount / daysActive) * 30).toFixed(1);
             return {
               "Pallet #": p.palletNumber,
-              Status: p.status,
+              Status: labelFor(statusLabels, p.status),
               "Trips Completed": p.tripCount,
               "Days Active": daysActive,
               "Trips/Month": tripsPerMonth,
@@ -331,7 +431,7 @@ export async function GET(req: NextRequest) {
           columns: ["Pallet #", "Status", "Return Due", "On Time", "Customer Location"],
           rows: delivered.map((p) => ({
             "Pallet #": p.palletNumber,
-            Status: p.status,
+            Status: labelFor(statusLabels, p.status),
             "Return Due": p.returnDueDate?.toISOString().slice(0, 10) ?? "—",
             "On Time": p.returnDueDate && new Date(p.returnDueDate) >= now ? "Yes" : "No",
             "Customer Location": p.currentLocation ?? "—",

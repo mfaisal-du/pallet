@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { safeAuth } from "@/lib/safe-auth";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
+import { rolesOfUser } from "@/lib/roles";
 
 // Admin-only: clear pallet data or seed demo pallets
 export async function POST(req: NextRequest) {
   const session = await safeAuth();
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "administrator") {
+  if (!rolesOfUser(session.user).includes("administrator")) {
     return NextResponse.json({ error: "Admin only" }, { status: 403 });
   }
 

@@ -279,7 +279,7 @@
   <h1>Pilot Training <span>Guide</span></h1>
   <p class="lead">Complete step-by-step walkthrough for trainers and staff. Covers every role, every screen, and the full pallet lifecycle from factory to customer and back.</p>
   <div class="cover-meta">
-    <span>📅 Version 1.0 — July 2026</span>
+    <span>📅 Version 1.3 — August 2026</span>
     <span>👥 All Roles Covered</span>
     <span>🔒 Confidential — Internal Use</span>
     <span>🌐 Works Offline (Open in Browser)</span>
@@ -311,6 +311,8 @@
     <a href="#s15"><span class="toc-num">15</span> System Settings</a>
     <a href="#s16"><span class="toc-num">16</span> Training Reset</a>
     <a href="#s17"><span class="toc-num">17</span> Full Test Checklist</a>
+    <a href="#s18"><span class="toc-num">18</span> Batch Scanning (Trips)</a>
+    <a href="#s19"><span class="toc-num">19</span> Role Flexibility (Multi-Role Users)</a>
   </div>
 </div>
 
@@ -360,7 +362,7 @@
 
     <div class="callout tip">
       <span class="callout-icon">✅</span>
-      <span><strong>Default login URL:</strong> Open the browser and go to <span class="url">http://localhost:3000/login</span> (or the server IP provided). Every user logs in with their email and password.</span>
+      <span><strong>Default login URL:</strong> Open the browser and go to <span class="url">http://localhost:3001/login</span> (or the server IP provided). Every user logs in with their email and password.</span>
     </div>
 
     <h3 style="margin: 16px 0 8px; color: var(--navy); font-size: 14px;">Demo Accounts (Seed Credentials)</h3>
@@ -480,6 +482,11 @@
     <div class="callout info" style="margin-top: 4px;">
       <span class="callout-icon">ℹ️</span>
       <span><strong>Side paths:</strong> At any point a pallet can be marked <span class="badge red">Damaged</span> → goes to <span class="badge orange">Under Repair</span> → then back to <span class="badge emerald">Available</span>. Or permanently <span class="badge slate">Retired</span> / <span class="badge red">Lost</span>.</span>
+    </div>
+
+    <div class="callout tip" style="margin-top: 4px;">
+      <span class="callout-icon">🧮</span>
+      <span><strong>Accurate trip counting:</strong> a pallet's trip count increases <strong>only once</strong> — when the factory receives it back in <strong>Good</strong> condition. Marking it damaged, repairing it, or retiring it never adds a trip. Damage records are created automatically and resolved when the repair is completed.</span>
     </div>
 
     <table class="role-table" style="margin-top:16px;">
@@ -663,8 +670,8 @@
       <div class="step-num">3</div>
       <div class="step-content">
         <h3>Fill dispatch details</h3>
-        <p><strong>Truck Number:</strong> Select from the fleet dropdown (pre-registered trucks).</p>
-        <p><strong>Driver Name:</strong> Select from the driver dropdown.</p>
+        <p><strong>Truck Number:</strong> Select from the fleet dropdown (pre-registered trucks). Selecting a registered truck links the dispatch to that fleet record.</p>
+        <p><strong>Driver Name:</strong> Select from the driver dropdown. Selecting a registered driver links the dispatch to their fleet record — used by the Driver Performance Report and fleet history.</p>
         <p><strong>Destination:</strong> Type the customer/delivery site name.</p>
         <p><strong>Expected Delivery:</strong> Select the expected delivery date.</p>
         <p><strong>Notes:</strong> Optional instructions.</p>
@@ -755,7 +762,8 @@
       <div class="step-num">1</div>
       <div class="step-content">
         <h3>Scan pallet at customer location</h3>
-        <p>The pallet is <span class="badge blue">Delivered</span>. Select <strong>Return Pickup</strong>. Fill in pickup driver and condition. Submit → status becomes <span class="badge amber">Returning</span>.</p>
+        <p>The pallet is <span class="badge blue">Delivered</span>. Select <strong>Return Pickup</strong>. The <strong>Collector</strong> field is auto-filled with your logged-in user name (editable) — fill it only if a different person is physically collecting. Choose the condition and submit → status becomes <span class="badge amber">Returning</span>.</p>
+        <p><strong>Damaged at pickup?</strong> Choose <strong>Damaged</strong> under condition and describe it in the notes — the system records the pickup <em>and</em> logs a damage report automatically, so the damage is on record before the pallet reaches the factory.</p>
       </div>
     </div>
 
@@ -768,7 +776,7 @@
       <div class="step-num">2</div>
       <div class="step-content">
         <h3>Scan pallet at factory gate</h3>
-        <p>Pallet is <span class="badge amber">Returning</span>. Select <strong>Receive at Factory</strong>. Fill inspector name and condition checklist. Submit → status returns to <span class="badge emerald">Available</span>. Trip count increments by 1.</p>
+        <p>Pallet is <span class="badge amber">Returning</span>. Select <strong>Receive at Factory</strong>. The <strong>Inspector</strong> field is auto-filled with your logged-in user name (editable). Fill the condition checklist. Submit → status returns to <span class="badge emerald">Available</span>. Trip count increments by 1.</p>
       </div>
     </div>
 
@@ -795,7 +803,7 @@
       <div class="step-num">1</div>
       <div class="step-content">
         <h3>Mark as Damaged (Scan page)</h3>
-        <p>Any role with scan access can mark a pallet damaged. Scan the pallet → select <strong>Mark Damaged</strong> → describe the damage → submit. Status becomes <span class="badge red">Damaged</span>. An automatic notification is sent to all admins and managers.</p>
+        <p>Any role with scan access can mark a pallet damaged. Scan the pallet → select <strong>Mark Damaged</strong> → describe the damage → submit. Status becomes <span class="badge red">Damaged</span>. A <strong>damage record</strong> is created automatically (visible in the Damaged Pallet Report) and a notification is sent to all admins and managers.</p>
       </div>
     </div>
     <div class="step">
@@ -809,7 +817,7 @@
       <div class="step-num">3</div>
       <div class="step-content">
         <h3>Complete Repair</h3>
-        <p>When the physical pallet is fixed, click <strong>Complete Repair</strong> on the profile. Status returns to <span class="badge emerald">Available</span> and the pallet re-enters the normal cycle.</p>
+        <p>When the physical pallet is fixed, click <strong>Complete Repair</strong> on the profile. Status returns to <span class="badge emerald">Available</span> and the pallet re-enters the normal cycle. All open damage reports for the pallet are marked <strong>Resolved</strong> automatically, and completing a repair does <strong>not</strong> count as a completed trip.</p>
       </div>
     </div>
     <div class="step">
@@ -855,6 +863,7 @@
       <div class="step-content">
         <h3>Reports page</h3>
         <p>Go to <strong>Reports</strong> in the sidebar. Filter by date range and status. The audit trail on the right side shows every action taken by every user with timestamps — useful for accountability.</p>
+        <p><strong>Driver Performance Report:</strong> shows each fleet driver with <strong>dispatches</strong> vs <strong>completed deliveries</strong> — a dispatch only counts as a delivery once the pallet is confirmed delivered — plus their phone number from the fleet record.</p>
       </div>
     </div>
     <div class="step">
@@ -945,7 +954,7 @@
       <div class="step-content">
         <h3>Assign a Driver to a Truck</h3>
         <p>In the Trucks table, click the 🔗 <strong>Assign</strong> icon next to any truck. A modal appears — select the driver from the dropdown. Click <strong>Assign Driver</strong>. The truck card now shows the driver's name and phone.</p>
-        <p>This assignment carries over to Dispatch — the dispatcher sees which driver is default for each truck.</p>
+        <p>This assignment is a linked database relation — a truck can only be assigned a driver that exists in the Drivers list, so fleet records stay consistent. The assignment carries over to Dispatch — the dispatcher sees which driver is default for each truck.</p>
       </div>
     </div>
     <div class="step">
@@ -1209,6 +1218,21 @@
       <li>Admin cannot deactivate own account</li>
     </ul>
 
+    <h3 style="font-size:13px; font-weight:800; color:var(--navy); margin: 16px 0 8px;">📑 Batch Scanning (Trips)</h3>
+    <ul class="checklist">
+      <li>Batch Scan page opens with a list of trips and a New Trip button</li>
+      <li>Can create a Dispatch Trip with truck, driver and destination entered once</li>
+      <li>Return Collection Trip auto-fills the Collector from the logged-in user</li>
+      <li>Factory Receive Trip auto-fills the Inspector from the logged-in user</li>
+      <li>Multiple pallets scan onto the same trip without re-typing the header</li>
+      <li>Per-pallet condition prompt appears (Good / Damaged / Unknown)</li>
+      <li>Marking Damaged at collection or factory creates a damage record</li>
+      <li>Scanned / failed counters update after every scan</li>
+      <li>Complete Trip closes the trip and shows it under Recent completed trips</li>
+      <li>Driver Performance report shows the Trips column</li>
+      <li>Trip header (truck/driver/destination/collector/inspector) saved on every movement</li>
+    </ul>
+
     <div class="callout tip" style="margin-top:20px;">
       <span class="callout-icon">🏆</span>
       <span><strong>All boxes checked?</strong> The system is fully operational and ready for live use. Hand over the production credentials to the client and switch off the training seed accounts (or change their passwords).</span>
@@ -1216,9 +1240,167 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 18 — BATCH SCANNING (TRIPS)
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s18">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ede9fe">📑</div>
+    <div>
+      <h2>18. Batch Scanning — Save Once, Scan Many</h2>
+      <p>Create one trip header, then scan multiple pallets onto it — no re-typing per pallet</p>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <span><strong>What batch scanning does:</strong> For <strong>Dispatch</strong>, <strong>Return Collection</strong> and <strong>Factory Receive</strong>, you now create a <strong>Trip</strong> first — entering the truck, driver and destination (or collector / inspector) <strong>once</strong> — and then scan as many pallets onto that trip as you like. The trip header is saved onto every pallet automatically.</span>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">👤</span>
+      <span>Available to: <span class="badge violet">Administrator</span> <span class="badge amber">Dispatcher</span> <span class="badge orange">Return Collector</span> <span class="badge slate">Factory Receiver</span> — <span class="badge blue">Manager</span> is view-only.</span>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Open the Batch Scan page</h3>
+        <p>Click <strong>Batch Scan</strong> in the sidebar. You'll see a list of open trips and a <strong>+ New Trip</strong> button.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Choose the trip type</h3>
+        <p>Pick <strong>Dispatch Trip</strong>, <strong>Return Collection Trip</strong>, or <strong>Factory Receive Trip</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Fill the header once</h3>
+        <p><strong>Dispatch:</strong> select the <strong>Truck</strong> and <strong>Driver</strong> from the fleet dropdowns and type the <strong>Destination</strong>.</p>
+        <p><strong>Return Collection:</strong> the <strong>Collector</strong> name is auto-filled with your logged-in user — just verify it.</p>
+        <p><strong>Factory Receive:</strong> the <strong>Inspector</strong> name is auto-filled with your logged-in user — just verify it.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Start the trip</h3>
+        <p>Click <strong>Start Trip</strong>. The trip opens with the scanner, a live manifest, and a batch summary showing scanned / failed counts.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h3>Scan pallets one by one</h3>
+        <p>Scan the QR code (or type the number manually) for each pallet. On the return flows each one asks for a condition before adding:</p>
+        <p><strong>Return Collection:</strong> Good / Damaged / Unknown. Choosing <strong>Damaged</strong> lets you describe it — the system records the pickup and a damage report automatically.</p>
+        <p><strong>Factory Receive:</strong> Good / Damaged. Choosing <strong>Damaged</strong> sends the pallet to the <span class="badge red">Damaged</span> status and creates a damage record instead of returning it to Available.</p>
+        <p><strong>Dispatch:</strong> no condition prompt — just click <strong>Add to Trip</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h3>Watch the manifest update</h3>
+        <p>Every scanned pallet appears with its status change (e.g. Loaded → In Transit). The scanned counter in the header and summary updates instantly.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-content">
+        <h3>Complete the trip</h3>
+        <p>When all pallets for that load are scanned, click <strong>Complete Trip</strong>. The trip closes and appears under <strong>Recent completed trips</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">8</div>
+      <div class="step-content">
+        <h3>Check the Driver Performance Report</h3>
+        <p>The report now shows a <strong>Trips</strong> column per driver — how many dispatch trips they completed — alongside Dispatches and Deliveries.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     SECTION 19 — ROLE FLEXIBILITY (MULTI-ROLE USERS)
+═══════════════════════════════════════════════════════════════════════════ -->
+<div class="section" id="s19">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ecfeff">👥</div>
+    <div>
+      <h2>19. Role Flexibility — One User, Multiple Roles</h2>
+      <p>Grant a single account several roles (e.g. Dispatcher + Delivery Receiver) — the user can then perform all of those steps</p>
+    </div>
+  </div>
+  <div class="section-body">
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div>
+        <strong>Why this matters (client Q4)</strong><br />
+        In practice the same sales team member or truck driver often visits the same customer for a new
+        delivery <em>and</em> picks up returns. With role flexibility that one person can dispatch, confirm
+        delivery, and collect returns — without needing three separate accounts.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Open User Management (Administrator only)</h3>
+        <p>Go to <strong>Users</strong> in the side navigation. Only Administrators can manage users.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Add or edit a user and pick multiple roles</h3>
+        <p>Click <strong>Add user</strong> or the <strong>Edit</strong> button on a user row. The <strong>Roles (multi-select)</strong>
+        section lists all 8 roles as checkable chips — tick every role the person needs. Each user row also shows
+        badges for all of the user's roles (e.g. <em>Dispatcher · Delivery Receiver · Return Collector</em>).</p>
+        <p>The first checked role becomes the account's <em>primary</em> role (used for sorting and the post-login home page).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>What the combined user can now do</h3>
+        <p>Authorization is the <strong>union</strong> of every assigned role. A user with Dispatcher + Delivery
+        Receiver + Return Collector can, on the <strong>Scan</strong> page and <strong>Batch Scan</strong> page:</p>
+        <ul>
+          <li><strong>Dispatch</strong> loaded pallets onto a truck (Dispatcher)</li>
+          <li><strong>Confirm delivery</strong> at the customer (Delivery Receiver)</li>
+          <li><strong>Collect returns</strong> on the return visit (Return Collector)</li>
+          <li><strong>Receive pallets</strong> back at the factory (Factory Receiver, if assigned)</li>
+        </ul>
+        <p>The side navigation only shows sections that role set can access (e.g. admin-only Users / Settings stay hidden).</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>Good practice — keep it audited</h3>
+        <p>Every scan and action is still recorded in the <strong>Audit Log</strong> with the acting user's name and the
+        exact transition, so a combined-role user never works invisibly. Best practice: give combined roles only to
+        trusted team members, and keep Administrator / Manager assignments to a few people.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <!-- FOOTER -->
 <div style="text-align:center; padding:32px 0 0; color:#94a3b8; font-size:12px;">
-  <p>PalletTrack Pro · Pilot Training Guide v1.0 · Confidential &amp; Internal Use Only</p>
+  <p>PalletTrack Pro · Pilot Training Guide v1.3 · Confidential &amp; Internal Use Only</p>
   <p style="margin-top:4px;">Prepared for Water Company Client Training — July 2026</p>
 </div>
 

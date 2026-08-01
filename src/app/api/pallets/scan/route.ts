@@ -3,6 +3,7 @@ import { safeAuth } from "@/lib/safe-auth";
 import { prisma } from "@/lib/db";
 import { logAudit } from "@/lib/audit";
 import { canScan, getNextTransition, getTransitionsFrom } from "@/lib/pallet-machine";
+import { rolesOfUser } from "@/lib/roles";
 
 export async function GET(req: NextRequest) {
   const session = await safeAuth();
@@ -44,7 +45,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Pallet not found" }, { status: 404 });
   }
 
-  const allowed = canScan(pallet.status, session.user.role);
+  const userRoles = rolesOfUser(session.user);
+  const allowed = canScan(pallet.status, userRoles);
   if (!allowed) {
     await logAudit({
       userId: session.user.id,
@@ -52,7 +54,7 @@ export async function GET(req: NextRequest) {
       action: "scan_permission_denied",
       entity: "Pallet",
       entityId: pallet.id,
-      detail: `Role ${session.user.role} cannot act on status ${pallet.status}`,
+      detail: `Roles ${userRoles.join("/")} cannot act on status ${pallet.status}`,
     });
     return NextResponse.json({ pallet, permitted: false });
   }
@@ -66,13 +68,13 @@ export async function GET(req: NextRequest) {
     detail: `Scanned ${pallet.palletNumber} (status: ${pallet.status})`,
   });
 
-  // Return all valid transitions for the role so the client can build forms
+  // Return all valid transitions for the user's roles so the client can build forms
   const allTransitions = getTransitionsFrom(pallet.status);
   const roleTransitions = allTransitions
-    .filter((t) => t.roles.includes(session.user.role))
+    .filter((t) => t.roles.some((r) => userRoles.includes(r)))
     .map((t) => ({ action: t.action, formLabel: t.formLabel, to: t.to }));
 
-  const primaryTransition = getNextTransition(pallet.status, session.user.role);
+  const primaryTransition = getNextTransition(pallet.status, userRoles);
 
   return NextResponse.json({
     pallet,

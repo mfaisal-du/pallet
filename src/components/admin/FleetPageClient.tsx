@@ -32,7 +32,7 @@ const emptyDriver = { name: "", phone: "", licenseNo: "", notes: "" };
 
 // ─── Fleet Page Client ────────────────────────────────────────────────────────
 
-export function FleetPageClient({ userRole }: { userRole: Role }) {
+export function FleetPageClient({ userRole, userRoles }: { userRole: Role; userRoles?: Role[] }) {
   const [tab, setTab] = useState<"trucks" | "drivers">("trucks");
   const [trucks, setTrucks] = useState<TruckRecord[]>([]);
   const [drivers, setDrivers] = useState<DriverRecord[]>([]);
@@ -41,7 +41,8 @@ export function FleetPageClient({ userRole }: { userRole: Role }) {
   const [search, setSearch] = useState("");
   const toast = useToast();
 
-  const canEdit = ["administrator", "manager"].includes(userRole);
+  const roles = userRoles && userRoles.length > 0 ? userRoles : [userRole];
+  const canEdit = roles.includes("administrator") || roles.includes("manager");
 
   // ── Truck modals ──
   const [showAddTruck, setShowAddTruck] = useState(false);

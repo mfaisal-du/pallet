@@ -5,10 +5,11 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { PageReveal } from "@/components/motion/PageReveal";
 import { Badge } from "@/components/ui/Badge";
+import { useStatusLabels } from "@/components/layout/StatusLabelsProvider";
 import {
   Truck, Package, MapPin, Clock, AlertTriangle,
   ArrowRight, QrCode, CheckCircle2, Eye,
-  Users, BarChart3,
+  Users, BarChart3, Layers,
 } from "lucide-react";
 
 type AvailablePallet = { id: string; palletNumber: string; materialType: string; currentLocation: string | null; createdAt: string };
@@ -41,6 +42,7 @@ export function DispatchPageClient({
   activeTrucks: FleetTruck[];
   activeDrivers: FleetDriver[];
 }) {
+  const labels = useStatusLabels();
   const [tab, setTab] = useState<"ready" | "transit" | "fleet">("ready");
   const now = new Date();
   const overdueCount = inTransitPallets.filter(p => p.returnDueDate && new Date(p.returnDueDate) < now).length;
@@ -66,18 +68,23 @@ export function DispatchPageClient({
               {overdueCount > 0 && <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-red-400 animate-pulse" />{overdueCount} overdue</span>}
             </div>
           </div>
-          <Link href="/admin/scan" className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition sm:w-auto sm:shrink-0 backdrop-blur-sm">
-            <QrCode size={14} /> Open Scanner
-          </Link>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:shrink-0 sm:flex-row">
+            <Link href="/admin/trips" className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-navy-900 hover:bg-sky-100 transition shadow-md">
+              <Layers size={14} /> Batch Dispatch
+            </Link>
+            <Link href="/admin/scan" className="flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 transition backdrop-blur-sm">
+              <QrCode size={14} /> Open Scanner
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Quick stats */}
       <div className="flex gap-3 overflow-x-auto pb-1">
         {[
-          { label: "Available (Not Loaded)", value: availablePallets.length, color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: Package },
-          { label: "Loaded (Ready to Dispatch)", value: loadedPallets.length, color: "bg-sky-50 text-sky-700 border-sky-200", icon: Package },
-          { label: "In Transit", value: inTransitPallets.length, color: "bg-violet-50 text-violet-700 border-violet-200", icon: Truck },
+          { label: `${labels.available} (Not Loaded)`, value: availablePallets.length, color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: Package },
+          { label: `${labels.loaded} (Ready to Dispatch)`, value: loadedPallets.length, color: "bg-sky-50 text-sky-700 border-sky-200", icon: Package },
+          { label: labels.in_transit, value: inTransitPallets.length, color: "bg-violet-50 text-violet-700 border-violet-200", icon: Truck },
           { label: "Overdue Returns", value: overdueCount, color: overdueCount > 0 ? "bg-red-50 text-red-700 border-red-200" : "bg-slate-50 text-slate-600 border-slate-200", icon: AlertTriangle },
           { label: "Active Fleet", value: activeTrucks.length, color: "bg-emerald-50 text-emerald-700 border-emerald-200", icon: BarChart3 },
         ].map(({ label, value, color, icon: Icon }) => (
@@ -97,7 +104,7 @@ export function DispatchPageClient({
       <div className="flex gap-1 rounded-xl border border-line bg-white p-1 shadow-sm w-full sm:w-fit">
         {([
           { key: "ready", label: "Dispatch Pipeline", icon: Package, count: availablePallets.length + loadedPallets.length },
-          { key: "transit", label: "In Transit", icon: Truck, count: inTransitPallets.length },
+          { key: "transit", label: labels.in_transit, icon: Truck, count: inTransitPallets.length },
           { key: "fleet", label: "Fleet Status", icon: Users, count: activeTrucks.length },
         ] as const).map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
@@ -337,12 +344,12 @@ export function DispatchPageClient({
         <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-muted">Full Pallet Lifecycle</p>
         <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
           {[
-            { label: "Available", color: "bg-emerald-100 text-emerald-800" },
-            { label: "Loaded", color: "bg-blue-100 text-blue-800" },
-            { label: "In Transit", color: "bg-violet-100 text-violet-800" },
-            { label: "Delivered", color: "bg-sky-100 text-sky-800" },
-            { label: "Returning", color: "bg-amber-100 text-amber-800" },
-            { label: "Available", color: "bg-emerald-100 text-emerald-800" },
+            { label: labels.available, color: "bg-emerald-100 text-emerald-800" },
+            { label: labels.loaded, color: "bg-blue-100 text-blue-800" },
+            { label: labels.in_transit, color: "bg-violet-100 text-violet-800" },
+            { label: labels.delivered, color: "bg-sky-100 text-sky-800" },
+            { label: labels.returning, color: "bg-amber-100 text-amber-800" },
+            { label: labels.available, color: "bg-emerald-100 text-emerald-800" },
           ].map((s, i, arr) => (
             <span key={i} className="flex items-center gap-1.5">
               <span className={`rounded-full px-2.5 py-1 ${s.color}`}>{s.label}</span>
